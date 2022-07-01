@@ -1,0 +1,47 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "setuptools_scm[toml]>=3.5",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/cdda_tools/_version.py"
+write_to_template = "__version__ = '{version}'"
+local_scheme = "no-local-version"
+fallback_version = "0.0.0.dev0"
+
+[tool.black]
+exclude = "_version.py"
+target-version = [
+    "py37",
+    "py38",
+]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.pylint]
+    [tool.pylint.master]
+    extension-pkg-whitelist = []
+    ignore = "_version.py"
+
+    [tool.pylint.message_control]
+    max-line-length = 120
+    disable = [
+        "C0103", # ignore invalid-names like "x", "y"
+        "C0415", # ignore defered imports
+        "R0801", # ignore code duplications
+    ]
+
+    [tool.pylint.reports]
+    output-format = "colorized"
+
+    [tool.pylint.design]
+    max-args = 7
+    max-locals = 20
+    max-attributes = 15
+    max-parents = 10
+    min-public-methods = 0
