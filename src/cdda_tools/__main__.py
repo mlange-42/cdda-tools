@@ -2,7 +2,10 @@ import argparse
 
 from . import commands
 
-COMMANDS = {"copy-player": commands.CopyPlayer()}
+COMMANDS = {
+    "copy-player": commands.CopyPlayer(),
+    "copy-vehicle": commands.CopyVehicle(),
+}
 
 
 def create_parser():

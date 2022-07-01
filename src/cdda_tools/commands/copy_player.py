@@ -63,13 +63,15 @@ PROPERTIES = [
     "snippets_read",
     "assigned_invlet",
     "invcache",
-    "calorie_diary"
+    "calorie_diary",
 ]
 
-class CopyPlayer(Command):
 
+class CopyPlayer(Command):
     def add_subcommand(self, subparsers):
-        parser_copy_player = subparsers.add_parser("copy-player", help="copy-player help")
+        parser_copy_player = subparsers.add_parser(
+            "copy-player", help="Copies a player from one world to another."
+        )
 
         parser_copy_player.add_argument(
             "--world",
@@ -106,7 +108,11 @@ class CopyPlayer(Command):
         world_dir_2 = util.get_world_path(arg.dir, arg.world2)
         save_2, player_2 = util.get_save_path(world_dir_2, arg.player2)
 
-        print("Copying {} ({}) -> {} ({})".format(player_1, world_dir_1, player_2, world_dir_2))
+        print(
+            "Copying player {} ({}) -> {} ({})".format(
+                player_1, world_dir_1, player_2, world_dir_2
+            )
+        )
 
         source = json.read_json(save_1, skip_lines=1)
         target = json.read_json(save_2, skip_lines=1)
@@ -116,4 +122,8 @@ class CopyPlayer(Command):
 
         json.write_json(target, save_2)
 
-        print("Successfully copied {} ({}) -> {} ({})".format(player_1, world_dir_1, player_2, world_dir_2))
+        print(
+            "Successfully copied player {} ({}) -> {} ({})".format(
+                player_1, world_dir_1, player_2, world_dir_2
+            )
+        )
