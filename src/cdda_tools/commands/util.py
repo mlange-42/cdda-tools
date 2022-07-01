@@ -46,4 +46,4 @@ def get_save_path(world_dir, player):
     pl = players[0] if player is None else player
     pos = players.index(pl)
 
-    return sav_files[pos][:-4], pl
+    return sav_files[pos], pl
