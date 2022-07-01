@@ -2,3 +2,29 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+# local version for user install
+setup.py
+# info folder with testing scirpts
+info/
+
+# generated version file
+src/cdda_tools/_version.py
