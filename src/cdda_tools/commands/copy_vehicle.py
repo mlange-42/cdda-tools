@@ -127,3 +127,13 @@ class CopyVehicle(Command):
         if target_vehicle is None:
             print("Could not find target vehicle '{}'".format(arg.vehicle))
             exit(1)
+
+        target_vehicle["parts"] = source_vehicle["parts"]
+
+        json.write_json(targets, target_maps[0])
+
+        print(
+            "Successfully copied vehicle {} ({}) -> {} ({})".format(
+                arg.vehicle, world_dir_1, arg.vehicle2, world_dir_2
+            )
+        )
