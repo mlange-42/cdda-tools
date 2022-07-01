@@ -3,6 +3,68 @@ from os import path
 from . import Command, util
 from .. import json
 
+PROPERTIES = [
+    "pain",
+    "effects",
+    "body",
+    "weapon",
+    "str_cur",
+    "str_max",
+    "dex_cur",
+    "dex_max",
+    "int_cur",
+    "int_max",
+    "per_cur",
+    "per_max",
+    "str_bonus",
+    "dex_bonus",
+    "per_bonus",
+    "int_bonus",
+    "base_age",
+    "base_height",
+    "blood_type",
+    "blood_rh_factor",
+    "avg_nat_bpm",
+    "custom_profession",
+    "healthy",
+    "healthy_mod",
+    "health_tally",
+    "thirst",
+    "hunger",
+    "fatigue",
+    "cardio_acc",
+    "sleep_deprivation",
+    "stored_calories",
+    "radiation",
+    "stamina",
+    "vitamin_levels",
+    "type_of_scent",
+    "focus_pool",
+    "kill_xp",
+    "spent_upgrade_points",
+    "traits",
+    "mutations",
+    "martial_arts_data",
+    "my_bionics",
+    "skills",
+    "proficiencies",
+    "power_level",
+    "max_power_level_modifier",
+    "stomach",
+    "guts",
+    "slow_rad",
+    "scent",
+    "male",
+    "worn",
+    "inv",
+    "profession",
+    "learned_recipes",
+    "items_identified",
+    "snippets_read",
+    "assigned_invlet",
+    "invcache",
+    "calorie_diary"
+]
 
 class CopyPlayer(Command):
 
@@ -48,4 +110,7 @@ class CopyPlayer(Command):
 
         source = json.read_json(save_1, skip_lines=1)
         target = json.read_json(save_2, skip_lines=1)
+
+        for prop in PROPERTIES:
+            target["player"][prop] = source["player"][prop]
 
