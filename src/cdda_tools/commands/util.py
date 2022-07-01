@@ -3,9 +3,10 @@ import glob
 from .. import json
 
 SAVE_DIR = "save"
+MAPS_DIR = "maps"
 
 
-def get_world_path(directory, world):
+def get_world_path(directory: str, world: str) -> str:
     world_dir = path.join(directory, SAVE_DIR, world)
     if not path.isdir(world_dir):
         print("World directory {} does not exist.".format(world_dir))
@@ -14,7 +15,7 @@ def get_world_path(directory, world):
     return world_dir
 
 
-def get_save_path(world_dir, player):
+def get_save_path(world_dir: str, player: str) -> (str, str):
 
     sav_files = glob.glob(path.join(world_dir, "*.sav"))
     if not sav_files:
@@ -47,3 +48,11 @@ def get_save_path(world_dir, player):
     pos = players.index(pl)
 
     return sav_files[pos], pl
+
+
+def file_contains(p: str, text: str) -> bool:
+    file = open(p, "r")
+    content = file.read()
+    cont = text in content
+    file.close()
+    return cont

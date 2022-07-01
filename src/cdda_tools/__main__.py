@@ -2,11 +2,17 @@ import argparse
 
 from . import commands
 
-COMMANDS = {"copy-player": commands.CopyPlayer()}
+COMMANDS = {
+    "copy-player": commands.CopyPlayer(),
+    "copy-vehicle": commands.CopyVehicle(),
+}
 
 
 def create_parser():
-    parser = argparse.ArgumentParser(description="Process some integers.")
+    parser = argparse.ArgumentParser(
+        description="Cataclysm DDA Python tools.",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
     parser.add_argument(
         "--dir",
         "-d",
@@ -15,7 +21,10 @@ def create_parser():
         help="game directory, default '.'",
     )
 
-    subparsers = parser.add_subparsers(help="sub-command help", dest="subparser")
+    subparsers = parser.add_subparsers(
+        help="sub-command help",
+        dest="subparser",
+    )
 
     for name, cmd in COMMANDS.items():
         cmd.add_subcommand(subparsers)
