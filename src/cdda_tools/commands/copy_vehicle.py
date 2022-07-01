@@ -1,5 +1,6 @@
 import os
 from os import path
+import argparse
 
 from . import Command, util
 from .. import json
@@ -18,7 +19,15 @@ def find_files_with(p, text):
 class CopyVehicle(Command):
     def add_subcommand(self, subparsers):
         parser_copy_player = subparsers.add_parser(
-            "copy-vehicle", help="Copies a vehicle from one world to another."
+            "copy-vehicle",
+            help="Copies a vehicle from one world to another.",
+            description="Copies a vehicle from one world to another\n\n"
+            "  1. Give the vehicle to be copied a unique name\n"
+            "  2. Debug a vehicle into the new world, or find one; it will be replaced by the source vehicle\n"
+            "  3. Give the vehicle in the new world a unique name\n"
+            "  2. Use this command with the names of the old and new worlds, and the old and new vehicles:\n"
+            "     cdda_tools copy-player -w OldWorld -v OldVehicle -w2 NewWorld -v2 NewVehicle",
+            formatter_class=argparse.RawTextHelpFormatter,
         )
 
         parser_copy_player.add_argument(
