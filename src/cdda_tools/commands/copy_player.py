@@ -114,3 +114,6 @@ class CopyPlayer(Command):
         for prop in PROPERTIES:
             target["player"][prop] = source["player"][prop]
 
+        json.write_json(target, save_2)
+
+        print("Successfully copied {} ({}) -> {} ({})".format(player_1, world_dir_1, player_2, world_dir_2))
