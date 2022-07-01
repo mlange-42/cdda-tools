@@ -4,8 +4,9 @@ JSON file handling.
 import json
 
 
-def read_json(path):
+def read_json(path, skip_lines=0):
     f = open(path)
-    data = json.load(f)
+    lines = f.readlines()[skip_lines:]
+    data = json.loads("".join(lines))
     f.close()
     return data
