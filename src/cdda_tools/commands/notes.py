@@ -124,6 +124,10 @@ def matches(string, regex_arr):
     return False
 
 
+def print_note(note):
+    print("{}{:3} | {:3} {:3} | {}".format("!" if note[3] else " ", note[4] if note[3] else " ", note[0], note[1], note[2]))
+
+
 def list_notes(seen_files, patterns, danger):
     rex = [regex.compile(translate(p)) for p in patterns]
     for file in seen_files:
@@ -132,7 +136,7 @@ def list_notes(seen_files, patterns, danger):
         for i in range(len(notes)):
             for n in notes[i]:
                 if (not danger or n[3]) and matches(n[2], rex):
-                    print(n[2])
+                    print_note(n)
 
 
 def mark_notes_danger(seen_files, patterns, radius):
@@ -151,7 +155,7 @@ def mark_notes_danger(seen_files, patterns, radius):
                         n[3] = True
                         n[4] = radius
                     file_changed = True
-                    print(n[2])
+                    print_note(n)
         if file_changed:
             json.write_json(content, file)
 
@@ -165,7 +169,7 @@ def delete_notes(seen_files, patterns):
         for i in range(len(notes)):
             for n in notes[i]:
                 if matches(n[2], rex):
-                    print(n[2])
+                    print_note(n)
             old_size = len(notes[i])
             notes[i] = list(filter(lambda n: not matches(n[2], rex), notes[i]))
             if len(notes[i]) < old_size:
