@@ -46,8 +46,8 @@ class Notes(Command):
         parser_filter.add_argument(
             "pattern",
             type=str,
-            nargs="*",
-            help="glob pattern to filter out notes",
+            nargs="+",
+            help="glob pattern to delete notes",
         )
 
         parser_list = subparsers.add_parser(
@@ -60,21 +60,28 @@ class Notes(Command):
         parser_list.add_argument(
             "pattern",
             type=str,
-            nargs="*",
+            nargs="+",
             help="glob pattern to list notes",
+        )
+
+        parser_list.add_argument(
+            "--danger",
+            "-d",
+            action="store_true",
+            help="list only dangerous notes",
         )
 
         parser_danger = subparsers.add_parser(
             "danger",
-            help="Mark overmap notes as dangerous, by symbol or text.",
-            description="Mark overmap notes as dangerous, by symbol or text.",
+            help="Mark/unmark overmap notes as dangerous, by symbol or text.",
+            description="Mark/unmark overmap notes as dangerous, by symbol or text.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
         parser_danger.add_argument(
             "pattern",
             type=str,
-            nargs="*",
+            nargs="+",
             help="glob pattern to mark notes",
         )
 
@@ -100,7 +107,7 @@ class Notes(Command):
         seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
 
         if arg.notes_subparser == "list":
-            list_notes(seen_files, arg.pattern)
+            list_notes(seen_files, arg.pattern, arg.danger)
         elif arg.notes_subparser == "delete":
             delete_notes(seen_files, arg.pattern)
         elif arg.notes_subparser == "danger":
@@ -117,14 +124,14 @@ def matches(string, regex_arr):
     return False
 
 
-def list_notes(seen_files, patterns):
+def list_notes(seen_files, patterns, danger):
     rex = [regex.compile(translate(p)) for p in patterns]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
         for i in range(len(notes)):
             for n in notes[i]:
-                if matches(n[2], rex):
+                if (not danger or n[3]) and matches(n[2], rex):
                     print(n[2])
 
 
