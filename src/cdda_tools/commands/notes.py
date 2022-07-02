@@ -38,25 +38,12 @@ class Notes(Command):
             help="Notes sub-commands",
             dest="notes_subparser",
         )
+        self._add_parser_list(subparsers)
+        self._add_parser_delete(subparsers)
+        self._add_parser_danger(subparsers)
+        self._add_parser_edit(subparsers)
 
-        parser_filter = subparsers.add_parser(
-            "delete",
-            help="Delete overmap notes by pattern.",
-            description="Delete overmap notes by pattern.",
-            formatter_class=argparse.RawTextHelpFormatter,
-        )
-        parser_filter.add_argument(
-            "pattern",
-            type=str,
-            nargs="+",
-            help="glob pattern to delete notes",
-        )
-        parser_filter.add_argument(
-            "--dry",
-            action="store_true",
-            help="dry-run (don't save changes)",
-        )
-
+    def _add_parser_list(self, subparsers):
         parser_list = subparsers.add_parser(
             "list",
             help="List overmap notes by pattern.",
@@ -76,6 +63,26 @@ class Notes(Command):
             help="list only dangerous notes",
         )
 
+    def _add_parser_delete(self, subparsers):
+        parser_delete = subparsers.add_parser(
+            "delete",
+            help="Delete overmap notes by pattern.",
+            description="Delete overmap notes by pattern.",
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
+        parser_delete.add_argument(
+            "pattern",
+            type=str,
+            nargs="+",
+            help="glob pattern to delete notes",
+        )
+        parser_delete.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
+        )
+
+    def _add_parser_danger(self, subparsers):
         parser_danger = subparsers.add_parser(
             "danger",
             help="Mark/unmark overmap notes as dangerous, by pattern.",
@@ -101,6 +108,7 @@ class Notes(Command):
             help="dry-run (don't save changes)",
         )
 
+    def _add_parser_edit(self, subparsers):
         parser_edit = subparsers.add_parser(
             "edit",
             help="Edit note symbol, color or text, by pattern.",
@@ -119,9 +127,7 @@ class Notes(Command):
         parser_edit.add_argument(
             "--color", "-c", type=str, help="color letter(s) to set; optional"
         )
-        parser_edit.add_argument(
-            "--text", "-t", type=str, help="text set; optional"
-        )
+        parser_edit.add_argument("--text", "-t", type=str, help="text set; optional")
         parser_edit.add_argument(
             "--dry",
             action="store_true",
@@ -148,7 +154,9 @@ class Notes(Command):
         elif arg.notes_subparser == "danger":
             mark_notes_danger(seen_files, arg.pattern, arg.radius, arg.dry)
         elif arg.notes_subparser == "edit":
-            edit_notes(seen_files, arg.pattern, arg.symbol, arg.color, arg.text, arg.dry)
+            edit_notes(
+                seen_files, arg.pattern, arg.symbol, arg.color, arg.text, arg.dry
+            )
         else:
             print("Unknown notes sub-command '{}'.".format(arg.notes_subparser))
             exit(1)
@@ -163,12 +171,12 @@ def matches(string, regex_arr):
 
 def note_to_str(note):
     return "{}{:3} | {:3} {:3} | {}".format(
-            "!" if note[3] else " ",
-            note[4] if note[3] else " ",
-            note[0],
-            note[1],
-            note[2],
-        )
+        "!" if note[3] else " ",
+        note[4] if note[3] else " ",
+        note[0],
+        note[1],
+        note[2],
+    )
 
 
 def list_notes(seen_files, patterns, danger):
@@ -190,15 +198,11 @@ def edit_notes(seen_files, patterns, symbol, color, text, dry):
         exit(1)
 
     if symbol is not None and len(symbol) != 1:
-        print(
-            "Symbol argument must be a single character!"
-        )
+        print("Symbol argument must be a single character!")
         exit(1)
 
     if color is not None and (len(color) < 1 or len(color) > 2):
-        print(
-            "Color argument must be a string of 1 or 2 characters!"
-        )
+        print("Color argument must be a string of 1 or 2 characters!")
         exit(1)
 
     rex = [regex.compile(translate(p)) for p in patterns]
@@ -224,7 +228,7 @@ def _edit_note(note: str, symbol, color, text):
     if color is not None:
         tup[1] = color
     if text is not None:
-        note = "{}{}".format(note[:tup[2]], text)
+        note = "{}{}".format(note[: tup[2]], text)
 
     return format_note_tuple(tup, note)
 
