@@ -13,28 +13,28 @@ IS_NOT_WHITESPACE = regex.compile("[^ :;]")
 
 class Notes(Command):
     def add_subcommand(self, subparsers):
-        parser_copy_player = subparsers.add_parser(
+        parser = subparsers.add_parser(
             "notes",
             help="Edit overmap notes.",
             description="Edit overmap notes.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser_copy_player.add_argument(
+        parser.add_argument(
             "--world",
             "-w",
             type=str,
             required=True,
             help="the game world to copy from",
         )
-        parser_copy_player.add_argument(
+        parser.add_argument(
             "--player",
             "-p",
             type=str,
             help="the player to modify notes for, optional if only one player in world",
         )
 
-        subparsers = parser_copy_player.add_subparsers(
+        subparsers = parser.add_subparsers(
             help="Notes sub-commands",
             dest="notes_subparser",
         )
@@ -45,12 +45,16 @@ class Notes(Command):
             description="Delete overmap notes by pattern.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
-
         parser_filter.add_argument(
             "pattern",
             type=str,
             nargs="+",
             help="glob pattern to delete notes",
+        )
+        parser_filter.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
         )
 
         parser_list = subparsers.add_parser(
@@ -59,14 +63,12 @@ class Notes(Command):
             description="List overmap notes by pattern.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
-
         parser_list.add_argument(
             "pattern",
             type=str,
             nargs="+",
             help="glob pattern to list notes",
         )
-
         parser_list.add_argument(
             "--danger",
             "-d",
@@ -76,18 +78,16 @@ class Notes(Command):
 
         parser_danger = subparsers.add_parser(
             "danger",
-            help="Mark/unmark overmap notes as dangerous, by symbol or text.",
-            description="Mark/unmark overmap notes as dangerous, by symbol or text.",
+            help="Mark/unmark overmap notes as dangerous, by pattern.",
+            description="Mark/unmark overmap notes as dangerous, by pattern.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
-
         parser_danger.add_argument(
             "pattern",
             type=str,
             nargs="+",
             help="glob pattern to mark notes",
         )
-
         parser_danger.add_argument(
             "--radius",
             "-r",
@@ -95,14 +95,18 @@ class Notes(Command):
             default=2,
             help="autotravel avoidance radius, use negative value to un-mark danger; default 2",
         )
+        parser_danger.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
+        )
 
         parser_edit = subparsers.add_parser(
             "edit",
-            help="Edit note symbol, color or text, by symbol or text.",
-            description="Edit note symbol, color or text, by symbol or text.",
+            help="Edit note symbol, color or text, by pattern.",
+            description="Edit note symbol, color or text, by pattern.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
-
         parser_edit.add_argument(
             "pattern",
             type=str,
@@ -110,13 +114,18 @@ class Notes(Command):
             help="glob pattern to edit notes",
         )
         parser_edit.add_argument(
-            "--symbol", "-s", type=str, nargs=1, help="symbol to set; optional"
+            "--symbol", "-s", type=str, help="symbol to set; optional"
         )
         parser_edit.add_argument(
-            "--color", "-c", type=str, nargs=1, help="color letter(s) to set; optional"
+            "--color", "-c", type=str, help="color letter(s) to set; optional"
         )
         parser_edit.add_argument(
-            "--text", "-t", type=str, nargs=1, help="text set; optional"
+            "--text", "-t", type=str, help="text set; optional"
+        )
+        parser_edit.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
         )
 
     def exec(self, arg):
@@ -135,11 +144,11 @@ class Notes(Command):
         if arg.notes_subparser == "list":
             list_notes(seen_files, arg.pattern, arg.danger)
         elif arg.notes_subparser == "delete":
-            delete_notes(seen_files, arg.pattern)
+            delete_notes(seen_files, arg.pattern, arg.dry)
         elif arg.notes_subparser == "danger":
-            mark_notes_danger(seen_files, arg.pattern, arg.radius)
+            mark_notes_danger(seen_files, arg.pattern, arg.radius, arg.dry)
         elif arg.notes_subparser == "edit":
-            edit_notes(seen_files, arg.pattern, arg.symbol, arg.color, arg.text)
+            edit_notes(seen_files, arg.pattern, arg.symbol, arg.color, arg.text, arg.dry)
         else:
             print("Unknown notes sub-command '{}'.".format(arg.notes_subparser))
             exit(1)
@@ -152,16 +161,14 @@ def matches(string, regex_arr):
     return False
 
 
-def print_note(note):
-    print(
-        "{}{:3} | {:3} {:3} | {}".format(
+def note_to_str(note):
+    return "{}{:3} | {:3} {:3} | {}".format(
             "!" if note[3] else " ",
             note[4] if note[3] else " ",
             note[0],
             note[1],
             note[2],
         )
-    )
 
 
 def list_notes(seen_files, patterns, danger):
@@ -172,13 +179,25 @@ def list_notes(seen_files, patterns, danger):
         for i in range(len(notes)):
             for n in notes[i]:
                 if (not danger or n[3]) and matches(n[2], rex):
-                    print_note(n)
+                    print(note_to_str(n))
 
 
-def edit_notes(seen_files, patterns, symbol, color, text):
+def edit_notes(seen_files, patterns, symbol, color, text, dry):
     if symbol is None and color is None and text is None:
         print(
             "Notes sub-command 'edit' requires at least one of options --symbol/-s, --color/-c, --text/-t"
+        )
+        exit(1)
+
+    if symbol is not None and len(symbol) != 1:
+        print(
+            "Symbol argument must be a single character!"
+        )
+        exit(1)
+
+    if color is not None and (len(color) < 1 or len(color) > 2):
+        print(
+            "Color argument must be a string of 1 or 2 characters!"
         )
         exit(1)
 
@@ -190,15 +209,24 @@ def edit_notes(seen_files, patterns, symbol, color, text):
         for i in range(len(notes)):
             for n in notes[i]:
                 if matches(n[2], rex):
-                    print_note(n)
-                    _edit_note(n[2], symbol, color, text)
-        if file_changed:
+                    print(note_to_str(n))
+                    n[2] = _edit_note(n[2], symbol, color, text)
+                    print(note_to_str(n))
+                    print("-----------------------------------------")
+        if file_changed and not dry:
             json.write_json(content, file)
 
 
 def _edit_note(note: str, symbol, color, text):
     tup = note_tuple(note)
-    print(tup)
+    if symbol is not None:
+        tup[0] = symbol
+    if color is not None:
+        tup[1] = color
+    if text is not None:
+        note = "{}{}".format(note[:tup[2]], text)
+
+    return format_note_tuple(tup, note)
 
 
 def note_tuple(note):
@@ -242,7 +270,7 @@ def format_note_tuple(tup, note):
         return "{}:{};{}".format(tup[0], tup[1], note[tup[2] :])
 
 
-def mark_notes_danger(seen_files, patterns, radius):
+def mark_notes_danger(seen_files, patterns, radius, dry):
     rex = [regex.compile(translate(p)) for p in patterns]
     for file in seen_files:
         content = json.read_json(file)
@@ -258,12 +286,12 @@ def mark_notes_danger(seen_files, patterns, radius):
                         n[3] = True
                         n[4] = radius
                     file_changed = True
-                    print_note(n)
-        if file_changed:
+                    print(note_to_str(n))
+        if file_changed and not dry:
             json.write_json(content, file)
 
 
-def delete_notes(seen_files, patterns):
+def delete_notes(seen_files, patterns, dry):
     rex = [regex.compile(translate(p)) for p in patterns]
     for file in seen_files:
         content = json.read_json(file)
@@ -272,10 +300,10 @@ def delete_notes(seen_files, patterns):
         for i in range(len(notes)):
             for n in notes[i]:
                 if matches(n[2], rex):
-                    print_note(n)
+                    print(note_to_str(n))
             old_size = len(notes[i])
             notes[i] = list(filter(lambda n: not matches(n[2], rex), notes[i]))
             if len(notes[i]) < old_size:
                 file_changed = True
-        if file_changed:
+        if file_changed and not dry:
             json.write_json(content, file)
