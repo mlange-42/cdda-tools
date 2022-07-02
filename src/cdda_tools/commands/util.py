@@ -15,8 +15,7 @@ def get_world_path(directory: str, world: str) -> str:
     return world_dir
 
 
-def get_save_path(world_dir: str, player: str) -> (str, str):
-
+def get_save_path(world_dir: str, player: str) -> (str, str, str):
     sav_files = glob.glob(path.join(world_dir, "*.sav"))
     if not sav_files:
         print("No saved characters found in world directory {}.".format(world_dir))
@@ -25,7 +24,7 @@ def get_save_path(world_dir: str, player: str) -> (str, str):
     players = []
 
     for sav in sav_files:
-        character_data = json.read_json(sav, skip_lines=1)
+        character_data = json.read_json(sav)
         players.append(character_data["player"]["name"])
 
     if len(players) > 1 and player is None:
@@ -47,7 +46,9 @@ def get_save_path(world_dir: str, player: str) -> (str, str):
     pl = players[0] if player is None else player
     pos = players.index(pl)
 
-    return sav_files[pos], pl
+    save_name = sav_files[pos][len(world_dir) + 1 : -4]
+
+    return sav_files[pos], save_name, pl
 
 
 def file_contains(p: str, text: str) -> bool:

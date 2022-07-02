@@ -1,4 +1,3 @@
-from os import path
 import argparse
 
 from . import Command, util
@@ -110,10 +109,10 @@ class CopyPlayer(Command):
 
     def exec(self, arg):
         world_dir_1 = util.get_world_path(arg.dir, arg.world)
-        save_1, player_1 = util.get_save_path(world_dir_1, arg.player)
+        save_1, _, player_1 = util.get_save_path(world_dir_1, arg.player)
 
         world_dir_2 = util.get_world_path(arg.dir, arg.world2)
-        save_2, player_2 = util.get_save_path(world_dir_2, arg.player2)
+        save_2, _, player_2 = util.get_save_path(world_dir_2, arg.player2)
 
         print(
             "Copying player {} ({}) -> {} ({})".format(
@@ -121,8 +120,8 @@ class CopyPlayer(Command):
             )
         )
 
-        source = json.read_json(save_1, skip_lines=1)
-        target = json.read_json(save_2, skip_lines=1)
+        source = json.read_json(save_1)
+        target = json.read_json(save_2)
 
         for prop in PROPERTIES:
             target["player"][prop] = source["player"][prop]
