@@ -1,6 +1,6 @@
-import os
 from os import path
 import argparse
+import glob
 
 from . import Command, util
 from .. import json
@@ -30,4 +30,20 @@ class FilterNotes(Command):
         )
 
     def exec(self, arg):
-        pass
+        world_dir = util.get_world_path(arg.dir, arg.world)
+        save, save_name, player = util.get_save_path(world_dir, arg.player)
+
+        print(
+            "Filtering notes for {} ({})".format(
+                player, world_dir,
+            )
+        )
+
+        seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
+
+        for file in seen_files:
+            content = json.read_json(file)
+            notes = content["notes"]
+            for i in range(len(notes)):
+                notes[i] = list(filter(lambda n: n[2].startswith("."), notes[i]))
+
