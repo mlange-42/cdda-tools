@@ -9,6 +9,7 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 * Edit Overmap notes by glob pattern
    * Delete notes
    * Mark/unmark dangerous
+   * Replace symbol/color/text
 
 ## Installation
 
