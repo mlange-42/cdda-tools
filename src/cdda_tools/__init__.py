@@ -2,7 +2,7 @@
 Cataclysm DDA Python tools.
 """
 
-from . import json
+from . import json, commands
 
 try:
     from ._version import __version__
