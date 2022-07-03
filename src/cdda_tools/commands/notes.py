@@ -284,16 +284,28 @@ def note_to_str(note):
     )
 
 
-def list_notes(seen_files, patterns, ignore, danger, case_sensitive):
+def _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, func):
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
     rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
+        file_changed = False
         for i in range(len(notes)):
             for n in notes[i]:
-                if (not danger or n[3]) and matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
-                    print(note_to_str(n))
+                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
+                    file_changed = func(n)
+        if file_changed and not dry:
+            json.write_json(content, file)
+
+
+def list_notes(seen_files, patterns, ignore, danger, case_sensitive):
+    def handle(note):
+        if not danger or note[3]:
+            print(note_to_str(note))
+        return False
+
+    _handle_notes(seen_files, patterns, ignore, case_sensitive, True, handle)
 
 
 def edit_notes(seen_files, patterns, ignore, symbol, color, text, case_sensitive, dry):
@@ -311,21 +323,14 @@ def edit_notes(seen_files, patterns, ignore, symbol, color, text, case_sensitive
         print("Color argument must be a string of 1 or 2 characters!")
         exit(1)
 
-    rex = [_compile_regex(p, case_sensitive) for p in patterns]
-    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
-    for file in seen_files:
-        content = json.read_json(file)
-        notes = content["notes"]
-        file_changed = False
-        for i in range(len(notes)):
-            for n in notes[i]:
-                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
-                    print(note_to_str(n))
-                    n[2] = _edit_note(n[2], symbol, color, text)
-                    print(note_to_str(n))
-                    print("-----------------------------------------")
-        if file_changed and not dry:
-            json.write_json(content, file)
+    def handle(note):
+        print(note_to_str(note))
+        note[2] = _edit_note(note[2], symbol, color, text)
+        print(note_to_str(note))
+        print("-----------------------------------------")
+        return True
+
+    _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
 
 
 def _edit_note(note: str, symbol, color, text):
@@ -391,21 +396,14 @@ def replace_in_notes(seen_files, patterns, ignore, replace, case_sensitive, dry)
         )
         exit(1)
 
-    rex = [_compile_regex(p, case_sensitive) for p in patterns]
-    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
-    for file in seen_files:
-        content = json.read_json(file)
-        notes = content["notes"]
-        file_changed = False
-        for i in range(len(notes)):
-            for n in notes[i]:
-                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
-                    print(note_to_str(n))
-                    n[2] = _replace_in_note(n[2], replace)
-                    print(note_to_str(n))
-                    print("-----------------------------------------")
-        if file_changed and not dry:
-            json.write_json(content, file)
+    def handle(note):
+        print(note_to_str(note))
+        note[2] = _replace_in_note(note[2], replace)
+        print(note_to_str(note))
+        print("-----------------------------------------")
+        return True
+
+    _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
 
 
 def format_note_tuple(tup, note):
@@ -416,25 +414,17 @@ def format_note_tuple(tup, note):
 
 
 def mark_notes_danger(seen_files, patterns, ignore, radius, case_sensitive, dry):
-    rex = [_compile_regex(p, case_sensitive) for p in patterns]
-    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
-    for file in seen_files:
-        content = json.read_json(file)
-        notes = content["notes"]
-        file_changed = False
-        for i in range(len(notes)):
-            for n in notes[i]:
-                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
-                    if radius < 0:
-                        n[3] = False
-                        n[4] = 0
-                    else:
-                        n[3] = True
-                        n[4] = radius
-                    file_changed = True
-                    print(note_to_str(n))
-        if file_changed and not dry:
-            json.write_json(content, file)
+    def handle(note):
+        if radius < 0:
+            note[3] = False
+            note[4] = 0
+        else:
+            note[3] = True
+            note[4] = radius
+        print(note_to_str(note))
+        return True
+
+    _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
 
 
 def delete_notes(seen_files, patterns, ignore, case_sensitive, dry):
