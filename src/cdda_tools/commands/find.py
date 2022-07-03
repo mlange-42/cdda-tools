@@ -32,14 +32,28 @@ class Find(Command):
             type=str,
             help="the player to rearch for",
         )
-        parser.add_argument(
-            "--terrain",
-            "-t",
+
+        subparsers = parser.add_subparsers(
+            help="Find sub-commands",
+            dest="find_subparser",
+        )
+
+        self._add_parser_terrain(subparsers)
+
+    def _add_parser_terrain(self, subparsers):
+        parser_terrain = subparsers.add_parser(
+            "terrain",
+            help="Find overmap terrain types by glob patterns.",
+            description="Find overmap terrain types by glob patterns.",
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
+        parser_terrain.add_argument(
+            "patterns",
             type=str,
             nargs="+",
-            help="search terrain by glob pattern(s)",
+            help="glob patterns to search for",
         )
-        parser.add_argument(
+        parser_terrain.add_argument(
             "--z-levels",
             "-z",
             type=int,
@@ -58,43 +72,50 @@ class Find(Command):
                 )
                 exit(1)
 
-        world_dir = util.get_world_path(arg.dir, arg.world)
-        save, save_name, player = util.get_save_path(world_dir, arg.player)
+        if arg.find_subparser == "terrain":
+            find_terrain(arg)
+        else:
+            print("Unknown find sub-command '{}'.".format(arg.find_subparser))
+            exit(1)
 
-        print(
-            "Searching for {} in {} ({})".format(
-                arg.terrain,
-                player,
-                world_dir,
-            )
+
+def find_terrain(arg):
+    world_dir = util.get_world_path(arg.dir, arg.world)
+    save, save_name, player = util.get_save_path(world_dir, arg.player)
+
+    print(
+        "Searching for terrain in {} ({})".format(
+            player,
+            world_dir,
         )
+    )
 
-        seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
-        seen_coords = [list(map(int, f.split(".")[-2:])) for f in seen_files]
-        files_overmap = [
-            path.join(world_dir, "o.{}.{}".format(*xy)) for xy in seen_coords
-        ]
+    seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
+    seen_coords = [list(map(int, f.split(".")[-2:])) for f in seen_files]
+    files_overmap = [
+        path.join(world_dir, "o.{}.{}".format(*xy)) for xy in seen_coords
+    ]
 
-        rex = [regex.compile(translate(pat)) for pat in arg.terrain]
+    rex = [regex.compile(translate(pat)) for pat in arg.patterns]
 
-        for map_file, seen_file, xy in zip(files_overmap, seen_files, seen_coords):
-            map_json = json.read_json(map_file)
-            layers = map_json["layers"]
-            for l in arg.z_levels:
-                layer = layers[l + 10]
-                pos = 0
-                for rle in layer:
-                    match = False
-                    for re in rex:
-                        if regex.match(re, rle[0]):
-                            match = True
-                            break
-                    if match:
-                        for i in range(rle[1]):
-                            xx, yy = util.index_to_xy_overmap(pos + i)
-                            print(
-                                "{}'{}, {}'{}, {}: {}".format(
-                                    xy[0], xx, xy[1], yy, l, rle[0]
-                                )
+    for map_file, seen_file, xy in zip(files_overmap, seen_files, seen_coords):
+        map_json = json.read_json(map_file)
+        layers = map_json["layers"]
+        for l in arg.z_levels:
+            layer = layers[l + 10]
+            pos = 0
+            for rle in layer:
+                match = False
+                for re in rex:
+                    if regex.match(re, rle[0]):
+                        match = True
+                        break
+                if match:
+                    for i in range(rle[1]):
+                        xx, yy = util.index_to_xy_overmap(pos + i)
+                        print(
+                            "{}'{}, {}'{}, {}: {}".format(
+                                xy[0], xx, xy[1], yy, l, rle[0]
                             )
-                    pos += rle[1]
+                        )
+                pos += rle[1]
