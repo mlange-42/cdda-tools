@@ -20,7 +20,9 @@ pip install git+https://github.com/mlange-42/cdda-tools.git
 
 ## Usage
 
-Run CDDA-Tools in your CDDA game directory:
+:warning: Backup your save files before usage! NO WARRANTY! :warning:
+
+Run CDDA-Tools in your Cataclysm game directory:
 
 ```shell
 python -m cdda_tools --help
@@ -31,14 +33,16 @@ Alternatively, use option `--dir` to specify the game directory.
 
 ## Examples
 
-**Copy player** `MyPlayer` from `World1` to `MyPlayer` in `World2`:
+Copy player `MyPlayer` from `World1` to `MyPlayer` in `World2`:
 
 ```shell
 cdda_tools copy-player -w World1 -p MyPlayer -w2 World2 -p2 MyPlayer
 ```
 
-**Mark notes as dangerous** that contain `Moose` or `moose`, for `MyPlayer` in `World1`. Auto-travel avoidance radius 2:
+Mark notes as dangerous that contain `Moose` or `moose`, for `MyPlayer` in `World1`. Auto-travel avoidance radius 2:
 
 ```shell
-cdda_tools notes -w World1 -p MyPlayer danger *[Mm]oose* --radius 2
+cdda_tools notes -w World1 -p MyPlayer danger *moose* --radius 2
+cdda_tools notes -w World1 -p MyPlayer danger *Moose* *moose* --case --radius 2
+cdda_tools notes -w World1 -p MyPlayer danger *[Mm]oose* --case --radius 2
 ```
