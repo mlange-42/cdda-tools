@@ -5,6 +5,7 @@ from . import commands
 COMMANDS = {
     "copy-player": commands.CopyPlayer(),
     "copy-vehicle": commands.CopyVehicle(),
+    "note": commands.Note(),
     "notes": commands.Notes(),
     "find": commands.Find(),
 }

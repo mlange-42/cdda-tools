@@ -285,16 +285,6 @@ def _compile_regex(pat, case_sensitive):
     return regex.compile(translate(pat))
 
 
-def note_to_str(note):
-    return "{}{:3} | {:3} {:3} | {}".format(
-        "!" if note[3] else " ",
-        note[4] if note[3] else " ",
-        note[0],
-        note[1],
-        note[2],
-    )
-
-
 def _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, func):
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
     rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
@@ -315,7 +305,7 @@ def _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, func):
 def list_notes(seen_files, patterns, ignore, danger, case_sensitive):
     def handle(note):
         if not danger or note[3]:
-            print(note_to_str(note))
+            print(util.note_to_str(note))
         return False
 
     _handle_notes(seen_files, patterns, ignore, case_sensitive, True, handle)
@@ -337,9 +327,9 @@ def edit_notes(seen_files, patterns, ignore, symbol, color, text, case_sensitive
         exit(1)
 
     def handle(note):
-        print(note_to_str(note))
+        print(util.note_to_str(note))
         note[2] = _edit_note(note[2], symbol, color, text)
-        print(note_to_str(note))
+        print(util.note_to_str(note))
         print("-----------------------------------------")
         return True
 
@@ -410,9 +400,9 @@ def replace_in_notes(seen_files, patterns, ignore, replace, case_sensitive, dry)
         exit(1)
 
     def handle(note):
-        print(note_to_str(note))
+        print(util.note_to_str(note))
         note[2] = _replace_in_note(note[2], replace)
-        print(note_to_str(note))
+        print(util.note_to_str(note))
         print("-----------------------------------------")
         return True
 
@@ -434,7 +424,7 @@ def mark_notes_danger(seen_files, patterns, ignore, radius, case_sensitive, dry)
         else:
             note[3] = True
             note[4] = radius
-        print(note_to_str(note))
+        print(util.note_to_str(note))
         return True
 
     _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
@@ -452,7 +442,7 @@ def delete_notes(seen_files, patterns, ignore, case_sensitive, dry):
                 if matches(n[2], rex, case_sensitive) and not matches(
                     n[2], rex_ign, case_sensitive
                 ):
-                    print(note_to_str(n))
+                    print(util.note_to_str(n))
             old_size = len(notes[i])
             notes[i] = list(
                 filter(
