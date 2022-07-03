@@ -1,3 +1,4 @@
+import os
 from os import path
 import glob
 from .. import json
@@ -70,6 +71,16 @@ def read_file(p: str) -> str:
     return content
 
 
+def find_files_with_text(p, text):
+    files = []
+    for map_dir in os.walk(p):
+        for map_file in map_dir[2]:
+            file_path = path.join(map_dir[0], map_file)
+            if file_contains(file_path, text):
+                files.append(file_path)
+    return files
+
+
 def index_to_xy_overmap(idx):
     x = idx % OVERMAP_SIZE
     y = idx // OVERMAP_SIZE
@@ -86,4 +97,3 @@ def note_to_str(note, omxy=["?", "?"]):
         note[1],
         note[2],
     )
-
