@@ -57,3 +57,16 @@ def file_contains(p: str, text: str) -> bool:
     cont = text in content
     file.close()
     return cont
+
+
+def read_file(p: str) -> str:
+    file = open(p, "r")
+    content = file.read()
+    file.close()
+    return content
+
+
+def index_to_xy_overmap(idx):
+    x = idx % 180
+    y = idx // 180
+    return x, y
