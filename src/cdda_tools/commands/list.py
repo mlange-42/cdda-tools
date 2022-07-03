@@ -1,6 +1,7 @@
 import argparse
 import os.path
 
+from .. import json
 from . import Command, util
 
 
@@ -8,8 +9,8 @@ class List(Command):
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "list",
-            help="List things at an overmap position.",
-            description="List things at an overmap position.",
+            help="List things at an overmap position (could be considered cheating!).",
+            description="List things at an overmap position (could be considered cheating!).",
             formatter_class=argparse.RawTextHelpFormatter,
         )
         parser.add_argument(
@@ -61,9 +62,37 @@ class List(Command):
                 world_dir,
                 util.MAPS_DIR,
                 "{}.{}.{}".format(cx, cy, z),
-                "{}.{}.{}".format(x, y, z),
+                "{}.{}.{}.map".format(x, y, z),
             )
             for z in arg.z_levels
         ]
 
-        print(map_files)
+        collect = {}
+
+        for file in map_files:
+            if not os.path.isfile(file):
+                continue
+
+            map_json = json.read_json(file)
+            for m in map_json:
+                items = m["items"]
+                for i in range(len(items) // 3):
+                    items_here = items[i * 3 + 2]
+                    id = ""
+                    count = 1
+                    for item in items_here:
+                        if isinstance(item, list):
+                            id = item[0]["typeid"]
+                            count = item[1]
+                        else:
+                            id = item["typeid"]
+
+                    if id in collect:
+                        collect[id] += count
+                    else:
+                        collect[id] = count
+
+        keys = list(collect.keys())
+        keys.sort()
+        for k in keys:
+            print("{} ({})".format(k, collect[k]))
