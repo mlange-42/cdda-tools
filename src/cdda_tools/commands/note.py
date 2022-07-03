@@ -80,9 +80,7 @@ class Note(Command):
             exit(1)
 
         if len(arg.symbol) != 1:
-            print(
-                "Note symbol must be exactly one character"
-            )
+            print("Note symbol must be exactly one character")
             exit(1)
 
         if len(arg.color) < 1 or len(arg.color) > 2:
@@ -96,7 +94,9 @@ class Note(Command):
         x_parts = list(map(int, arg.x.split("'")))
         y_parts = list(map(int, arg.y.split("'")))
 
-        seen_file = path.join(world_dir, "{}.seen.{}.{}".format(save_name, x_parts[0], y_parts[0]))
+        seen_file = path.join(
+            world_dir, "{}.seen.{}.{}".format(save_name, x_parts[0], y_parts[0])
+        )
 
         content = json.read_json(seen_file)
         notes = content["notes"]
@@ -105,13 +105,10 @@ class Note(Command):
             y_parts[1],
             "{}:{};{}".format(arg.symbol, arg.color, text),
             arg.radius is not None,
-            arg.radius or 0
+            arg.radius or 0,
         ]
         print(util.note_to_str(new_note))
         notes[arg.z + 10].append(new_note)
 
         if not arg.dry:
             json.write_json(content, seen_file)
-
-
-

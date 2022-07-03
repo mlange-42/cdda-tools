@@ -8,6 +8,7 @@ COMMANDS = {
     "note": commands.Note(),
     "notes": commands.Notes(),
     "find": commands.Find(),
+    "vehicle-mod": commands.VehicleMod(),
 }
 
 

@@ -14,7 +14,12 @@ def read_json(path):
     return data
 
 
-def write_json(data, path):
+def write_json(data, path, pretty=False):
     f = open(path, "w")
-    json.dump(data, f)
+
+    if pretty:
+        json.dump(data, f, indent=4)
+    else:
+        json.dump(data, f)
+
     f.close()

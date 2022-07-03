@@ -6,16 +6,6 @@ from . import Command, util
 from .. import json
 
 
-def find_files_with(p, text):
-    files = []
-    for map_dir in os.walk(p):
-        for map_file in map_dir[2]:
-            file_path = path.join(map_dir[0], map_file)
-            if util.file_contains(file_path, text):
-                files.append(file_path)
-    return files
-
-
 class CopyVehicle(Command):
     def add_subcommand(self, subparsers):
         parser_copy_player = subparsers.add_parser(
@@ -42,7 +32,7 @@ class CopyVehicle(Command):
             "-v",
             type=str,
             required=True,
-            help="the vehicle to copy from",
+            help="the (unique!) name of the vehicle to copy from",
         )
 
         parser_copy_player.add_argument(
@@ -57,7 +47,7 @@ class CopyVehicle(Command):
             "-v2",
             type=str,
             required=True,
-            help="the vehicle to copy to",
+            help="the (unique!) name of the vehicle to copy to",
         )
 
     def exec(self, arg):
@@ -65,10 +55,10 @@ class CopyVehicle(Command):
         world_dir_2 = util.get_world_path(arg.dir, arg.world2)
 
         source_path = path.join(world_dir_1, util.MAPS_DIR)
-        source_maps = find_files_with(source_path, arg.vehicle)
+        source_maps = util.find_files_with_text(source_path, arg.vehicle)
 
         target_path = path.join(world_dir_2, util.MAPS_DIR)
-        target_maps = find_files_with(target_path, arg.vehicle2)
+        target_maps = util.find_files_with_text(target_path, arg.vehicle2)
 
         if len(source_maps) == 0:
             print("Could not find source vehicle '{}'".format(arg.vehicle))
