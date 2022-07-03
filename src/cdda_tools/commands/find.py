@@ -61,6 +61,12 @@ class Find(Command):
             default=list(range(-10, 11)),
             help="restrict to z-levels",
         )
+        parser_terrain.add_argument(
+            "--unseen",
+            "-U",
+            action="store_true",
+            help="search also for unseen terrain",
+        )
 
     def exec(self, arg):
         for l in arg.z_levels:
@@ -77,6 +83,15 @@ class Find(Command):
         else:
             print("Unknown find sub-command '{}'.".format(arg.find_subparser))
             exit(1)
+
+
+def _is_seen(seen_layer, index):
+    pos = 0
+    for seen, le in seen_layer:
+        if index < pos + le:
+            return seen
+        pos += le
+    raise ValueError("Index {} out of range of seen layer (len=pos).".format(index))
 
 
 def find_terrain(arg):
@@ -100,9 +115,12 @@ def find_terrain(arg):
 
     for map_file, seen_file, xy in zip(files_overmap, seen_files, seen_coords):
         map_json = json.read_json(map_file)
+        seen_json = json.read_json(seen_file)
         layers = map_json["layers"]
+        seen_layers = seen_json["visible"]
         for l in arg.z_levels:
             layer = layers[l + 10]
+            seen_layer = seen_layers[l + 10]
             pos = 0
             for rle in layer:
                 match = False
@@ -112,10 +130,12 @@ def find_terrain(arg):
                         break
                 if match:
                     for i in range(rle[1]):
-                        xx, yy = util.index_to_xy_overmap(pos + i)
-                        print(
-                            "{}'{}, {}'{}, {}: {}".format(
-                                xy[0], xx, xy[1], yy, l, rle[0]
+                        index = pos + i
+                        if arg.unseen or _is_seen(seen_layer, index):
+                            xx, yy = util.index_to_xy_overmap(index)
+                            print(
+                                "{}'{}, {}'{}, {}: {}".format(
+                                    xy[0], xx, xy[1], yy, l, rle[0]
+                                )
                             )
-                        )
                 pos += rle[1]
