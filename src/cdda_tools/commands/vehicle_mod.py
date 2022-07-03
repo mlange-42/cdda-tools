@@ -32,7 +32,7 @@ class VehicleMod(Command):
             "-v",
             type=str,
             required=True,
-            help="the vehicle to use",
+            help="the (unique!) name of the in-game vehicle to use",
         )
         parser_copy_player.add_argument(
             "--id",

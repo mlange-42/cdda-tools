@@ -32,7 +32,7 @@ class CopyVehicle(Command):
             "-v",
             type=str,
             required=True,
-            help="the vehicle to copy from",
+            help="the (unique!) name of the vehicle to copy from",
         )
 
         parser_copy_player.add_argument(
@@ -47,7 +47,7 @@ class CopyVehicle(Command):
             "-v2",
             type=str,
             required=True,
-            help="the vehicle to copy to",
+            help="the (unique!) name of the vehicle to copy to",
         )
 
     def exec(self, arg):

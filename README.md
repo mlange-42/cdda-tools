@@ -4,13 +4,17 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 
 ## Features
 
-* Copy player between worlds
-* Copy vehicle between worlds
-* Edit Overmap notes, filtered by glob pattern:
+* `copy-player`: Copy player between worlds
+* `copy-vehicle`: Copy vehicle between worlds
+* `vehicle-mod`: Make mods from in-game vehicles
+* `notes`: Edit Overmap notes, filtered by glob pattern:
+   * List be search pattern
    * Delete notes
    * Mark/unmark dangerous
    * Replace symbol/color/text
    * Full-text search & replace
+* `note`: Add Overmap notes
+* `find`: Find Overmap terrain types, and maybe later also monsters and items
 
 ## Installation
 
@@ -45,4 +49,11 @@ Mark notes as dangerous that contain `Moose` or `moose`, for `MyPlayer` in `Worl
 cdda_tools notes -w World1 -p MyPlayer danger *moose* --radius 2
 cdda_tools notes -w World1 -p MyPlayer danger *Moose* *moose* --case --radius 2
 cdda_tools notes -w World1 -p MyPlayer danger *[Mm]oose* --case --radius 2
+```
+
+Make a mod from an in-game vehicle:
+
+```shell
+cdda_tools vehicle-mod -w World1 -v "My Death Mobile" --id death_mobile > my_death_mobile.json  // Windows
+cdda_tools vehicle-mod -w World1 -v "My Death Mobile" --id death_mobile | my_death_mobile.json  // Linux
 ```
