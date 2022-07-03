@@ -64,7 +64,7 @@ class Find(Command):
             "--unseen",
             "-U",
             action="store_true",
-            help="search also for unseen terrain",
+            help="search also for unseen terrain (could be considered cheating!)",
         )
 
     def exec(self, arg):

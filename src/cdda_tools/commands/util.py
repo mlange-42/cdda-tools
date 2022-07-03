@@ -1,4 +1,5 @@
 import glob
+import math
 import os
 from os import path
 
@@ -10,6 +11,7 @@ MAPS_DIR = "maps"
 OVERMAP_SIZE = 180
 MAP_SIZE = 24
 SUBMAP_SIZE = 12
+MAP_CHUNK_SIZE = 32
 
 
 def get_world_path(directory: str, world: str) -> str:
@@ -86,6 +88,20 @@ def index_to_xy_overmap(idx):
     x = idx % OVERMAP_SIZE
     y = idx // OVERMAP_SIZE
     return x, y
+
+
+def coord_to_map(x1, x2, y1, y2):
+    return OVERMAP_SIZE * x1 + x2, OVERMAP_SIZE * y1 + y2
+
+
+def map_to_chunk(x, y):
+    xx = x / MAP_CHUNK_SIZE
+    yy = y / MAP_CHUNK_SIZE
+
+    xx = int(math.floor(xx))
+    yy = int(math.floor(yy))
+
+    return xx, yy
 
 
 def note_to_str(note, omxy=["?", "?"]):
