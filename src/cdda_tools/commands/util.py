@@ -5,6 +5,10 @@ from .. import json
 SAVE_DIR = "save"
 MAPS_DIR = "maps"
 
+OVERMAP_SIZE = 180
+MAP_SIZE = 24
+SUBMAP_SIZE = 12
+
 
 def get_world_path(directory: str, world: str) -> str:
     world_dir = path.join(directory, SAVE_DIR, world)
@@ -57,3 +61,18 @@ def file_contains(p: str, text: str) -> bool:
     cont = text in content
     file.close()
     return cont
+
+
+def read_file(p: str) -> str:
+    file = open(p, "r")
+    content = file.read()
+    file.close()
+    return content
+
+
+def index_to_xy_overmap(idx):
+    x = idx % OVERMAP_SIZE
+    y = idx // OVERMAP_SIZE
+    return x, y
+
+
