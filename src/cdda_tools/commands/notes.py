@@ -59,6 +59,13 @@ class Notes(Command):
             help="glob patterns to list notes",
         )
         parser_list.add_argument(
+            "--ignore",
+            "-i",
+            type=str,
+            nargs="*",
+            help="glob patterns to ignore notes",
+        )
+        parser_list.add_argument(
             "--case",
             "-C",
             action="store_true",
@@ -85,6 +92,13 @@ class Notes(Command):
             help="glob patterns to delete notes",
         )
         parser_delete.add_argument(
+            "--ignore",
+            "-i",
+            type=str,
+            nargs="*",
+            help="glob patterns to ignore notes",
+        )
+        parser_delete.add_argument(
             "--case",
             "-C",
             action="store_true",
@@ -108,6 +122,13 @@ class Notes(Command):
             type=str,
             nargs="+",
             help="glob patterns to mark notes",
+        )
+        parser_danger.add_argument(
+            "--ignore",
+            "-i",
+            type=str,
+            nargs="*",
+            help="glob patterns to ignore notes",
         )
         parser_danger.add_argument(
             "--case",
@@ -142,6 +163,13 @@ class Notes(Command):
             help="glob patterns to edit notes",
         )
         parser_edit.add_argument(
+            "--ignore",
+            "-i",
+            type=str,
+            nargs="*",
+            help="glob patterns to ignore notes",
+        )
+        parser_edit.add_argument(
             "--case",
             "-C",
             action="store_true",
@@ -172,6 +200,13 @@ class Notes(Command):
             type=str,
             nargs="+",
             help="glob patterns to filter notes",
+        )
+        parser_edit.add_argument(
+            "--ignore",
+            "-i",
+            type=str,
+            nargs="*",
+            help="glob patterns to ignore notes",
         )
         parser_edit.add_argument(
             "--case",
@@ -207,17 +242,17 @@ class Notes(Command):
         seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
 
         if arg.notes_subparser == "list":
-            list_notes(seen_files, arg.patterns, arg.danger, arg.case)
+            list_notes(seen_files, arg.patterns, arg.ignore, arg.danger, arg.case)
         elif arg.notes_subparser == "delete":
-            delete_notes(seen_files, arg.patterns, arg.case, arg.dry)
+            delete_notes(seen_files, arg.patterns, arg.ignore, arg.case, arg.dry)
         elif arg.notes_subparser == "danger":
-            mark_notes_danger(seen_files, arg.patterns, arg.radius, arg.case, arg.dry)
+            mark_notes_danger(seen_files, arg.patterns, arg.ignore, arg.radius, arg.case, arg.dry)
         elif arg.notes_subparser == "edit":
             edit_notes(
-                seen_files, arg.patterns, arg.symbol, arg.color, arg.text, arg.case, arg.dry
+                seen_files, arg.patterns, arg.ignore, arg.symbol, arg.color, arg.text, arg.case, arg.dry
             )
         elif arg.notes_subparser == "replace":
-            replace_in_notes(seen_files, arg.patterns, arg.replace, arg.case, arg.dry)
+            replace_in_notes(seen_files, arg.patterns, arg.ignore, arg.replace, arg.case, arg.dry)
         else:
             print("Unknown notes sub-command '{}'.".format(arg.notes_subparser))
             exit(1)
@@ -249,18 +284,19 @@ def note_to_str(note):
     )
 
 
-def list_notes(seen_files, patterns, danger, case_sensitive):
+def list_notes(seen_files, patterns, ignore, danger, case_sensitive):
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
+    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
         for i in range(len(notes)):
             for n in notes[i]:
-                if (not danger or n[3]) and matches(n[2], rex, case_sensitive):
+                if (not danger or n[3]) and matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
                     print(note_to_str(n))
 
 
-def edit_notes(seen_files, patterns, symbol, color, text, case_sensitive, dry):
+def edit_notes(seen_files, patterns, ignore, symbol, color, text, case_sensitive, dry):
     if symbol is None and color is None and text is None:
         print(
             "Notes sub-command 'edit' requires at least one of options --symbol/-s, --color/-c, --text/-t"
@@ -276,13 +312,14 @@ def edit_notes(seen_files, patterns, symbol, color, text, case_sensitive, dry):
         exit(1)
 
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
+    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
         file_changed = False
         for i in range(len(notes)):
             for n in notes[i]:
-                if matches(n[2], rex, case_sensitive):
+                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
                     print(note_to_str(n))
                     n[2] = _edit_note(n[2], symbol, color, text)
                     print(note_to_str(n))
@@ -347,7 +384,7 @@ def note_tuple(note):
     return result
 
 
-def replace_in_notes(seen_files, patterns, replace, case_sensitive, dry):
+def replace_in_notes(seen_files, patterns, ignore, replace, case_sensitive, dry):
     if len(replace) % 2 != 0:
         print(
             "Option --replace requires an even number of arguments (search/replace pairs)"
@@ -355,13 +392,14 @@ def replace_in_notes(seen_files, patterns, replace, case_sensitive, dry):
         exit(1)
 
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
+    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
         file_changed = False
         for i in range(len(notes)):
             for n in notes[i]:
-                if matches(n[2], rex, case_sensitive):
+                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
                     print(note_to_str(n))
                     n[2] = _replace_in_note(n[2], replace)
                     print(note_to_str(n))
@@ -377,15 +415,16 @@ def format_note_tuple(tup, note):
         return "{}:{};{}".format(tup[0], tup[1], note[tup[2] :])
 
 
-def mark_notes_danger(seen_files, patterns, radius, case_sensitive, dry):
+def mark_notes_danger(seen_files, patterns, ignore, radius, case_sensitive, dry):
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
+    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
         file_changed = False
         for i in range(len(notes)):
             for n in notes[i]:
-                if matches(n[2], rex, case_sensitive):
+                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
                     if radius < 0:
                         n[3] = False
                         n[4] = 0
@@ -398,18 +437,19 @@ def mark_notes_danger(seen_files, patterns, radius, case_sensitive, dry):
             json.write_json(content, file)
 
 
-def delete_notes(seen_files, patterns, case_sensitive, dry):
+def delete_notes(seen_files, patterns, ignore, case_sensitive, dry):
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
+    rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
         content = json.read_json(file)
         notes = content["notes"]
         file_changed = False
         for i in range(len(notes)):
             for n in notes[i]:
-                if matches(n[2], rex, case_sensitive):
+                if matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive):
                     print(note_to_str(n))
             old_size = len(notes[i])
-            notes[i] = list(filter(lambda n: not matches(n[2], rex, case_sensitive), notes[i]))
+            notes[i] = list(filter(lambda n: not (matches(n[2], rex, case_sensitive) and not matches(n[2], rex_ign, case_sensitive)), notes[i]))
             if len(notes[i]) < old_size:
                 file_changed = True
         if file_changed and not dry:
