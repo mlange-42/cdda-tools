@@ -35,6 +35,8 @@ python -m cdda_tools <command> --help
 
 Alternatively, use option `--dir` to specify the game directory.
 
+> Note that most commands have a `--dry` switch to test them without modifying any files.
+
 ## Examples
 
 Copy player `MyPlayer` from `World1` to `MyPlayer` in `World2`:
