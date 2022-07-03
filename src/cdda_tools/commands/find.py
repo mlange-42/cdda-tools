@@ -1,9 +1,7 @@
-import fnmatch
-import os
 from os import path
 import argparse
 import glob
-from fnmatch import fnmatchcase, translate
+from fnmatch import translate
 import regex
 
 from . import Command, util
@@ -69,15 +67,6 @@ class Find(Command):
         )
 
     def exec(self, arg):
-        for l in arg.z_levels:
-            if l < -10 or l > 10:
-                print(
-                    "Unsupported z level: {}. Must be in range [-10, 10]".format(
-                        l,
-                    )
-                )
-                exit(1)
-
         if arg.find_subparser == "terrain":
             find_terrain(arg)
         else:
@@ -95,6 +84,15 @@ def _is_seen(seen_layer, index):
 
 
 def find_terrain(arg):
+    for l in arg.z_levels:
+        if l < -10 or l > 10:
+            print(
+                "Unsupported z level: {}. Must be in range [-10, 10]".format(
+                    l,
+                )
+            )
+            exit(1)
+
     world_dir = util.get_world_path(arg.dir, arg.world)
     save, save_name, player = util.get_save_path(world_dir, arg.player)
 

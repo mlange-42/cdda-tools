@@ -76,3 +76,14 @@ def index_to_xy_overmap(idx):
     return x, y
 
 
+def note_to_str(note, omxy=["?", "?"]):
+    return "{}{:3} | {}'{:3} {}'{:3} | {}".format(
+        "!" if note[3] else " ",
+        note[4] if note[3] else " ",
+        omxy[0],
+        note[0],
+        omxy[1],
+        note[1],
+        note[2],
+    )
+
