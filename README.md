@@ -6,10 +6,11 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 
 * Copy player between worlds
 * Copy vehicle between worlds
-* Edit Overmap notes by glob pattern
+* Edit Overmap notes, filtered by glob pattern:
    * Delete notes
    * Mark/unmark dangerous
    * Replace symbol/color/text
+   * Full-text search & replace
 
 ## Installation
 

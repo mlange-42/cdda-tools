@@ -42,6 +42,7 @@ class Notes(Command):
         self._add_parser_delete(subparsers)
         self._add_parser_danger(subparsers)
         self._add_parser_edit(subparsers)
+        self._add_parser_replace(subparsers)
 
     def _add_parser_list(self, subparsers):
         parser_list = subparsers.add_parser(
@@ -134,6 +135,33 @@ class Notes(Command):
             help="dry-run (don't save changes)",
         )
 
+    def _add_parser_replace(self, subparsers):
+        parser_edit = subparsers.add_parser(
+            "replace",
+            help="Full-text replacement, in notes matching pattern.",
+            description="Full-text replacement, in notes matching pattern.",
+            formatter_class=argparse.RawTextHelpFormatter,
+        )
+        parser_edit.add_argument(
+            "pattern",
+            type=str,
+            nargs="+",
+            help="glob pattern to filter notes",
+        )
+        parser_edit.add_argument(
+            "--replace",
+            "-r",
+            type=str,
+            help="pairs of text to search, and replacement",
+            required=True,
+            nargs="+",
+        )
+        parser_edit.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
+        )
+
     def exec(self, arg):
         world_dir = util.get_world_path(arg.dir, arg.world)
         save, save_name, player = util.get_save_path(world_dir, arg.player)
@@ -157,6 +185,8 @@ class Notes(Command):
             edit_notes(
                 seen_files, arg.pattern, arg.symbol, arg.color, arg.text, arg.dry
             )
+        elif arg.notes_subparser == "replace":
+            replace_in_notes(seen_files, arg.pattern, arg.replace, arg.dry)
         else:
             print("Unknown notes sub-command '{}'.".format(arg.notes_subparser))
             exit(1)
@@ -233,6 +263,16 @@ def _edit_note(note: str, symbol, color, text):
     return format_note_tuple(tup, note)
 
 
+def _replace_in_note(note: str, replace):
+    tup = note_tuple(note)
+    for r in range(0, len(replace), 2):
+        text = note[tup[2]:]
+        text = text.replace(replace[r], replace[r+1])
+        note = "{}{}".format(note[: tup[2]], text)
+
+    return format_note_tuple(tup, note)
+
+
 def note_tuple(note):
     """(note symbol, note color, offset to text)"""
     result = ["N", None, 0]
@@ -265,6 +305,29 @@ def note_tuple(note):
         pos = end + 1
 
     return result
+
+
+def replace_in_notes(seen_files, patterns, replace, dry):
+    if len(replace) % 2 != 0:
+        print(
+            "Option --replace requires an even number of arguments (search/replace pairs)"
+        )
+        exit(1)
+
+    rex = [regex.compile(translate(p)) for p in patterns]
+    for file in seen_files:
+        content = json.read_json(file)
+        notes = content["notes"]
+        file_changed = False
+        for i in range(len(notes)):
+            for n in notes[i]:
+                if matches(n[2], rex):
+                    print(note_to_str(n))
+                    n[2] = _replace_in_note(n[2], replace)
+                    print(note_to_str(n))
+                    print("-----------------------------------------")
+        if file_changed and not dry:
+            json.write_json(content, file)
 
 
 def format_note_tuple(tup, note):
