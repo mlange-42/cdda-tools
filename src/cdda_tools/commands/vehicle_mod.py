@@ -41,6 +41,11 @@ class VehicleMod(Command):
             required=True,
             help="the new vehicle's id string",
         )
+        parser_copy_player.add_argument(
+            "--no-items",
+            action="store_true",
+            help="do not add items to the mod vehicle",
+        )
 
     def exec(self, arg):
         world_dir = util.get_world_path(arg.dir, arg.world)
@@ -79,11 +84,11 @@ class VehicleMod(Command):
             print("Could not find source vehicle '{}'".format(arg.vehicle))
             exit(1)
 
-        mod_json = vehicle_to_mod(source_vehicle, arg.id)
+        mod_json = vehicle_to_mod(source_vehicle, arg.id, arg.no_items)
         print(json.dumps(mod_json, indent=4))
 
 
-def vehicle_to_mod(vehicle, id):
+def vehicle_to_mod(vehicle, id, no_items):
     parts = []
     items = []
 
@@ -103,21 +108,22 @@ def vehicle_to_mod(vehicle, id):
                     if fuel_type is not None:
                         part_def["fuel"] = fuel_type
 
-        for item in part["items"]:
-            count = 1
-            if isinstance(item, list):
-                count = item[1]
-                item = item[0]
+        if not no_items:
+            for item in part["items"]:
+                count = 1
+                if isinstance(item, list):
+                    count = item[1]
+                    item = item[0]
 
-            item_def = {
-                "x": part["mount_dx"],
-                "y": part["mount_dy"],
-                "chance": 100,
-                "items": item["typeid"],
-            }
+                item_def = {
+                    "x": part["mount_dx"],
+                    "y": part["mount_dy"],
+                    "chance": 100,
+                    "items": item["typeid"],
+                }
 
-            for i in range(count):
-                items.append(item_def)
+                for i in range(count):
+                    items.append(item_def)
 
         parts.append(part_def)
 
