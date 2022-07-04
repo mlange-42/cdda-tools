@@ -6,6 +6,8 @@ from . import Command, util
 
 
 class Note(Command):
+    """Add Overmap notes."""
+
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "note",

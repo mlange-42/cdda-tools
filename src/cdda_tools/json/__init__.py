@@ -5,6 +5,7 @@ import json
 
 
 def read_json(path):
+    """Read JSON file to dictionary."""
     f = open(path)
     lines = f.readlines()
     if lines[0].startswith("#"):
@@ -15,6 +16,7 @@ def read_json(path):
 
 
 def write_json(data, path, pretty=False):
+    """Write dictionary to JSON file."""
     f = open(path, "w")
 
     if pretty:

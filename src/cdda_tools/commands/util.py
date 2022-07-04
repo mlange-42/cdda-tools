@@ -15,6 +15,7 @@ MAP_CHUNK_SIZE = 32
 
 
 def get_world_path(directory: str, world: str) -> str:
+    """Constructs and checks the world's save path"""
     world_dir = path.join(directory, SAVE_DIR, world)
     if not path.isdir(world_dir):
         print("World directory {} does not exist.".format(world_dir))
@@ -24,6 +25,7 @@ def get_world_path(directory: str, world: str) -> str:
 
 
 def get_save_path(world_dir: str, player: str) -> (str, str, str):
+    """Get player save location: (.sav file path, file base name, player name)"""
     sav_files = glob.glob(path.join(world_dir, "*.sav"))
     if not sav_files:
         print("No saved characters found in world directory {}.".format(world_dir))
@@ -60,6 +62,7 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
 
 
 def file_contains(p: str, text: str) -> bool:
+    """Tests is a file's content contains given text"""
     file = open(p, "r")
     content = file.read()
     cont = text in content
@@ -68,6 +71,7 @@ def file_contains(p: str, text: str) -> bool:
 
 
 def read_file(p: str) -> str:
+    """Read a text file"""
     file = open(p, "r")
     content = file.read()
     file.close()
@@ -75,6 +79,7 @@ def read_file(p: str) -> str:
 
 
 def find_files_with_text(p, text):
+    """Collects all files with content containing text, recursively."""
     files = []
     for map_dir in os.walk(p):
         for map_file in map_dir[2]:
@@ -85,16 +90,19 @@ def find_files_with_text(p, text):
 
 
 def index_to_xy_overmap(idx):
+    """Converts the index of a flat 180x180 overmap array into relative overmap tile coors"""
     x = idx % OVERMAP_SIZE
     y = idx // OVERMAP_SIZE
     return x, y
 
 
 def coord_to_map(x1, x2, y1, y2):
+    """Converts overmap coords of format (1'123, -1'50) to absolute overmap tile coords"""
     return OVERMAP_SIZE * x1 + x2, OVERMAP_SIZE * y1 + y2
 
 
 def map_to_chunk(x, y):
+    """Converts absolute overmap tile coords to map chunk/directory coords"""
     xx = x / MAP_CHUNK_SIZE
     yy = y / MAP_CHUNK_SIZE
 
@@ -105,6 +113,7 @@ def map_to_chunk(x, y):
 
 
 def note_to_str(note, omxy=["?", "?"]):
+    """Formats a note for printing"""
     return "{}{:3} | {}'{:3} {}'{:3} | {}".format(
         "!" if note[3] else " ",
         note[4] if note[3] else " ",

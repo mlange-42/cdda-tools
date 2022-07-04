@@ -14,6 +14,8 @@ IS_NOT_WHITESPACE = regex.compile("[^ :;]")
 
 
 class Notes(Command):
+    """View and manipulate Overmap notes."""
+
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "notes",

@@ -6,6 +6,8 @@ from . import Command, util
 
 
 class List(Command):
+    """List items on Overmap tile."""
+
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "list",

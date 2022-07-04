@@ -9,6 +9,8 @@ TANKS = set(["tank", "tank_medium", "tank_small", "external_tank"])
 
 
 class VehicleMod(Command):
+    """Create a mod file from an in-game vehicle."""
+
     def add_subcommand(self, subparsers):
         parser_copy_player = subparsers.add_parser(
             "vehicle-mod",

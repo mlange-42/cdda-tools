@@ -10,6 +10,8 @@ from . import Command, util
 
 
 class Find(Command):
+    """Find Overmap features"""
+
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "find",

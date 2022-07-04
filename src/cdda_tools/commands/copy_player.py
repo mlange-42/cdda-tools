@@ -68,6 +68,8 @@ PROPERTIES = [
 
 
 class CopyPlayer(Command):
+    """Copy the player between worlds"""
+
     def add_subcommand(self, subparsers):
         parser_copy_player = subparsers.add_parser(
             "copy-player",

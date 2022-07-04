@@ -6,6 +6,8 @@ from . import Command, util
 
 
 class CopyVehicle(Command):
+    """Copy a vehicle between worlds"""
+
     def add_subcommand(self, subparsers):
         parser_copy_player = subparsers.add_parser(
             "copy-vehicle",
