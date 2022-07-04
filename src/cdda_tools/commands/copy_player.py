@@ -101,6 +101,12 @@ class CopyPlayer(Command):
             help="the player to copy to, optional if only one player in world",
         )
 
+        parser.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
+        )
+
     def exec(self, arg):
         world_dir_1 = util.get_world_path(arg.dir, arg.world)
         save_1, _, player_1 = util.get_save_path(world_dir_1, arg.player)
@@ -120,7 +126,8 @@ class CopyPlayer(Command):
         for prop in PROPERTIES:
             target["player"][prop] = source["player"][prop]
 
-        json.write_json(target, save_2)
+        if not arg.dry:
+            json.write_json(target, save_2)
 
         print(
             "Successfully copied player {} ({}) -> {} ({})".format(

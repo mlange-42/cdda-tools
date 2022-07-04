@@ -41,6 +41,12 @@ class CopyVehicle(Command):
             help="the (unique!) name of the vehicle to copy to",
         )
 
+        parser.add_argument(
+            "--dry",
+            action="store_true",
+            help="dry-run (don't save changes)",
+        )
+
     def exec(self, arg):
         world_dir_1 = util.get_world_path(arg.dir, arg.world)
         world_dir_2 = util.get_world_path(arg.dir, arg.world2)
@@ -70,12 +76,13 @@ class CopyVehicle(Command):
             print("Could not find source vehicle '{}'".format(arg.vehicle))
             sys.exit(1)
         if target_vehicle is None:
-            print("Could not find target vehicle '{}'".format(arg.vehicle))
+            print("Could not find target vehicle '{}'".format(arg.vehicle2))
             sys.exit(1)
 
         target_vehicle["parts"] = source_vehicle["parts"]
 
-        json.write_json(targets, target_maps[0])
+        if not arg.dry:
+            json.write_json(targets, target_maps[0])
 
         print(
             "Successfully copied vehicle {} ({}) -> {} ({})".format(
