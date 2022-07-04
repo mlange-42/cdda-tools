@@ -1,7 +1,7 @@
 import argparse
 
-from . import Command, util
 from .. import json
+from . import Command, util
 
 PROPERTIES = [
     "pain",

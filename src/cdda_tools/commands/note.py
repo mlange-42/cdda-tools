@@ -1,8 +1,8 @@
 import argparse
 from os import path
 
-from . import Command, util
 from .. import json
+from . import Command, util
 
 
 class Note(Command):

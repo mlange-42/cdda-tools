@@ -1,11 +1,12 @@
-from os import path
 import argparse
 import glob
 from fnmatch import translate
+from os import path
+
 import regex
 
-from . import Command, util
 from .. import json
+from . import Command, util
 
 
 class Find(Command):

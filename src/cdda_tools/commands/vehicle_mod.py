@@ -1,10 +1,9 @@
-import os
-from os import path
 import argparse
-
-from . import Command, util
-from .. import json as cjson
 import json
+from os import path
+
+from .. import json as cjson
+from . import Command, util
 
 TANKS = set(["tank", "tank_medium", "tank_small", "external_tank"])
 

@@ -1,12 +1,13 @@
-import os
-from os import path
 import argparse
 import glob
-import regex
+import os
 from fnmatch import translate
+from os import path
 
-from . import Command, util
+import regex
+
 from .. import json
+from . import Command, util
 
 IS_WHITESPACE = regex.compile("[ :;]")
 IS_NOT_WHITESPACE = regex.compile("[^ :;]")

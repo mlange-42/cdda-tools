@@ -1,6 +1,7 @@
+import glob
 import os
 from os import path
-import glob
+
 from .. import json
 
 SAVE_DIR = "save"

@@ -1,7 +1,7 @@
-from os import path
-import unittest
 import shutil
 import tempfile
+import unittest
+from os import path
 
 import cdda_tools
 
