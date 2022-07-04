@@ -14,6 +14,7 @@ COMMANDS = {
     "notes": commands.Notes(),
     "find": commands.Find(),
     "list": commands.List(),
+    "read-data": commands.ReadData(),
     "vehicle-mod": commands.VehicleMod(),
 }
 
