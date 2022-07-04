@@ -1,3 +1,6 @@
+"""
+CLI commands.
+"""
 from . import util
 from .command import Command
 from .copy_player import CopyPlayer

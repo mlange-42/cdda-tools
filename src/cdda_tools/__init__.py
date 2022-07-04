@@ -1,5 +1,5 @@
 """
-Cataclysm DDA Python tools.
+Cataclysm DDA Python tools, package entrypoint.
 """
 
 from . import commands, json
