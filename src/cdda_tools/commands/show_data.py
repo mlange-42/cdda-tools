@@ -1,4 +1,4 @@
-"""Read game data."""
+"""Show game data."""
 import argparse
 import json
 import sys
@@ -11,13 +11,13 @@ from . import Command
 
 
 class ShowData(Command):
-    """Read game data."""
+    """Show game data."""
 
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "show-data",
-            help="Read game data.",
-            description="Read game data.",
+            help="Show JSON game data by categories and IDs.",
+            description="Show JSON game data by categories and IDs.",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
@@ -104,7 +104,7 @@ def _search(arg):
                 if match:
                     any_found = True
                     if arg.list:
-                        print(f"{key} ({cat})")
+                        print(f"{key:50} ({cat})")
                     elif arg.keys:
                         print(f"----- Category {cat}: {key} -----")
                         _check_is_dict(entry, f"{cat} --> {key}")
@@ -116,7 +116,7 @@ def _search(arg):
                         print(f"----- Category {cat}: {key} -----")
                         print(json.dumps(entry, indent=4))
     if not any_found:
-        print(f"No data found for IDs {keys}")
+        print(f"No data found for globs {arg.ids}")
 
 
 def _check_is_dict(entry, search_str):
