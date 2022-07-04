@@ -1,5 +1,7 @@
 # CDDA-Tools
 
+[![Tests](https://github.com/mlange-42/cdda-tools/actions/workflows/tests.yml/badge.svg)](https://github.com/mlange-42/cdda-tools/actions/workflows/tests.yml)
+
 Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 
 ## Features
