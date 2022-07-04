@@ -41,11 +41,7 @@ class CopyVehicle(Command):
             help="the (unique!) name of the vehicle to copy to",
         )
 
-        parser.add_argument(
-            "--dry",
-            action="store_true",
-            help="dry-run (don't save changes)",
-        )
+        util.add_dry_run_options(parser)
 
     def exec(self, arg):
         world_dir_1 = util.get_world_path(arg.dir, arg.world)

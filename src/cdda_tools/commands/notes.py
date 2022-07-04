@@ -349,11 +349,7 @@ def _add_parser_delete(subparsers):
         action="store_true",
         help="case-sensitive glob pattern",
     )
-    parser_delete.add_argument(
-        "--dry",
-        action="store_true",
-        help="dry-run (don't save changes)",
-    )
+    util.add_dry_run_options(parser_delete)
 
 
 def _add_parser_danger(subparsers):
@@ -389,11 +385,7 @@ def _add_parser_danger(subparsers):
         default=2,
         help="autotravel avoidance radius, use negative value to un-mark danger; default 2",
     )
-    parser_danger.add_argument(
-        "--dry",
-        action="store_true",
-        help="dry-run (don't save changes)",
-    )
+    util.add_dry_run_options(parser_danger)
 
 
 def _add_parser_edit(subparsers):
@@ -427,40 +419,36 @@ def _add_parser_edit(subparsers):
         "--color", "-c", type=str, help="color letter(s) to set; optional"
     )
     parser_edit.add_argument("--text", "-t", type=str, help="text set; optional")
-    parser_edit.add_argument(
-        "--dry",
-        action="store_true",
-        help="dry-run (don't save changes)",
-    )
+    util.add_dry_run_options(parser_edit)
 
 
 def _add_parser_replace(subparsers):
-    parser_edit = subparsers.add_parser(
+    parser_replace = subparsers.add_parser(
         "replace",
         help="Full-text replacement, in notes matching pattern.",
         description="Full-text replacement, in notes matching pattern.",
         formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser_edit.add_argument(
+    parser_replace.add_argument(
         "patterns",
         type=str,
         nargs="+",
         help="glob patterns to filter notes",
     )
-    parser_edit.add_argument(
+    parser_replace.add_argument(
         "--ignore",
         "-i",
         type=str,
         nargs="*",
         help="glob patterns to ignore notes",
     )
-    parser_edit.add_argument(
+    parser_replace.add_argument(
         "--case",
         "-c",
         action="store_true",
         help="case-sensitive glob pattern",
     )
-    parser_edit.add_argument(
+    parser_replace.add_argument(
         "--replace",
         "-r",
         type=str,
@@ -468,8 +456,4 @@ def _add_parser_replace(subparsers):
         required=True,
         nargs="+",
     )
-    parser_edit.add_argument(
-        "--dry",
-        action="store_true",
-        help="dry-run (don't save changes)",
-    )
+    util.add_dry_run_options(parser_replace)

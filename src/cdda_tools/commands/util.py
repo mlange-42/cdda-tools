@@ -81,6 +81,15 @@ def add_z_level_options(parser):
     )
 
 
+def add_dry_run_options(parser):
+    """Adds default dry run option to a parser"""
+    parser.add_argument(
+        "--dry",
+        action="store_true",
+        help="dry-run (don't save changes)",
+    )
+
+
 def check_is_single_vehicle_source(source_maps, name):
     """
     Checks that only a single element is passed,
