@@ -3,7 +3,7 @@ import argparse
 import sys
 from os import path
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 
@@ -11,7 +11,7 @@ class CopyVehicle(Command):
     """Copy a vehicle between worlds"""
 
     def add_subcommand(self, subparsers):
-        parser_copy_player = subparsers.add_parser(
+        parser = subparsers.add_parser(
             "copy-vehicle",
             help="Copies a vehicle from one world to another.",
             description="Copies a vehicle from one world to another\n\n"
@@ -25,29 +25,15 @@ class CopyVehicle(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser_copy_player.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world to copy from",
-        )
-        parser_copy_player.add_argument(
-            "--vehicle",
-            "-v",
-            type=str,
-            required=True,
-            help="the (unique!) name of the vehicle to copy from",
+        util.add_world_option(parser, "the game world to copy from")
+
+        util.add_vehicle_option(
+            parser, "the (unique!) name of the vehicle to copy from"
         )
 
-        parser_copy_player.add_argument(
-            "--world2",
-            "-w2",
-            type=str,
-            required=True,
-            help="the game world to copy to",
-        )
-        parser_copy_player.add_argument(
+        util.add_world2_option(parser, "the game world to copy to")
+
+        parser.add_argument(
             "--vehicle2",
             "-v2",
             type=str,
@@ -65,25 +51,8 @@ class CopyVehicle(Command):
         target_path = path.join(world_dir_2, util.MAPS_DIR)
         target_maps = util.find_files_with_text(target_path, arg.vehicle2)
 
-        if len(source_maps) == 0:
-            print("Could not find source vehicle '{}'".format(arg.vehicle))
-            sys.exit(1)
-        if len(source_maps) > 1:
-            print(
-                "Found multiple files for source vehicle name '{}'.\n"
-                "Please rename the vehicle to something unique.".format(arg.vehicle)
-            )
-            sys.exit(1)
-
-        if len(target_maps) == 0:
-            print("Could not find target vehicle '{}'".format(arg.vehicle2))
-            sys.exit(1)
-        if len(target_maps) > 1:
-            print(
-                "Found multiple files for target vehicle name '{}'.\n"
-                "Please rename the vehicle to something unique.".format(arg.vehicle2)
-            )
-            sys.exit(1)
+        util.check_is_single_vehicle_source(source_maps, arg.vehicle)
+        util.check_is_single_vehicle_source(target_maps, arg.vehicle2)
 
         print(
             "Copying vehicle {} ({}) -> {} ({})".format(

@@ -3,7 +3,7 @@ import argparse
 import sys
 from os import path
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 
@@ -18,30 +18,17 @@ class Note(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world serch in",
-        )
+        util.add_world_option(parser, "the game world to add a note")
+
         parser.add_argument(
             "--player",
             "-p",
             type=str,
             help="the player to rearch for",
         )
-        parser.add_argument(
-            "x",
-            type=str,
-            help="x coordinate in overmap format -1'179 "
-            '(quote neg. numbers, with a space: " -1\'32")',
-        )
-        parser.add_argument(
-            "y",
-            type=str,
-            help="y coordinate in overmap format -1'179",
-        )
+
+        util.add_xy_options(parser)
+
         parser.add_argument(
             "z",
             type=int,

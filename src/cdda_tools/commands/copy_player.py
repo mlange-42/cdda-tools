@@ -1,7 +1,7 @@
 """Copy the player between worlds"""
 import argparse
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 PROPERTIES = [
@@ -72,7 +72,7 @@ class CopyPlayer(Command):
     """Copy the player between worlds"""
 
     def add_subcommand(self, subparsers):
-        parser_copy_player = subparsers.add_parser(
+        parser = subparsers.add_parser(
             "copy-player",
             help="Copies a player from one world to another.",
             description="Copies a vehicle from one world to another\n\n"
@@ -83,28 +83,18 @@ class CopyPlayer(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser_copy_player.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world to copy from",
-        )
-        parser_copy_player.add_argument(
+        util.add_world_option(parser, "the game world to copy from")
+
+        parser.add_argument(
             "--player",
             "-p",
             type=str,
             help="the player to copy from, optional if only one player in world",
         )
 
-        parser_copy_player.add_argument(
-            "--world2",
-            "-w2",
-            type=str,
-            required=True,
-            help="the game world to copy to",
-        )
-        parser_copy_player.add_argument(
+        util.add_world2_option(parser, "the game world to copy to")
+
+        parser.add_argument(
             "--player2",
             "-p2",
             type=str,

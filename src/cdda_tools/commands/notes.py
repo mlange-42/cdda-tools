@@ -8,7 +8,7 @@ from os import path
 
 import regex
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 IS_WHITESPACE = regex.compile("[ :;]")
@@ -26,13 +26,8 @@ class Notes(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world to copy from",
-        )
+        util.add_world_option(parser, "the game world to search in")
+
         parser.add_argument(
             "--player",
             "-p",

@@ -19,15 +19,15 @@ class TestJson(unittest.TestCase):
         f.write('{"a": 1, "b": "Hallo"}')
         f.close()
 
-        data = cdda_tools.json.read_json(temp_path)
+        data = cdda_tools.json_utils.read_json(temp_path)
         self.assertEqual(data, {"a": 1, "b": "Hallo"})
 
     def test_write_json(self):
         temp_path = path.join(self.test_dir, "test.json")
         data = {"a": 1, "b": "Hallo"}
-        cdda_tools.json.write_json(data, temp_path)
+        cdda_tools.json_utils.write_json(data, temp_path)
 
-        data2 = cdda_tools.json.read_json(temp_path)
+        data2 = cdda_tools.json_utils.read_json(temp_path)
         self.assertEqual(data, data2)
         self.assertEqual(data, {"a": 1, "b": "Hallo"})
         self.assertEqual(data2, {"a": 1, "b": "Hallo"})

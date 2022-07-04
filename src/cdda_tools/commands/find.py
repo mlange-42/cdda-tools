@@ -7,7 +7,7 @@ from os import path
 
 import regex
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 
@@ -22,18 +22,13 @@ class Find(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world serch in",
-        )
+        util.add_world_option(parser, "the game world search in")
+
         parser.add_argument(
             "--player",
             "-p",
             type=str,
-            help="the player to rearch for",
+            help="the player to search for",
         )
 
         subparsers = parser.add_subparsers(
@@ -64,14 +59,9 @@ def _add_parser_terrain(subparsers):
         nargs="+",
         help="glob patterns to search for",
     )
-    parser_terrain.add_argument(
-        "--z-levels",
-        "-z",
-        type=int,
-        nargs="+",
-        default=list(range(-10, 11)),
-        help="restrict to z-levels",
-    )
+
+    util.add_z_level_options(parser_terrain)
+
     parser_terrain.add_argument(
         "--unseen",
         "-U",
@@ -92,14 +82,7 @@ def _is_seen(seen_layer, index):
 def find_terrain(arg):
     """Execute the find terrain command"""
     # pylint: disable=too-many-locals
-    for level in arg.z_levels:
-        if level < -10 or level > 10:
-            print(
-                "Unsupported z level: {}. Must be in range [-10, 10]".format(
-                    level,
-                )
-            )
-            sys.exit(1)
+    util.check_levels(arg.z_levels)
 
     world_dir = util.get_world_path(arg.dir, arg.world)
     _, save_name, player = util.get_save_path(world_dir, arg.player)

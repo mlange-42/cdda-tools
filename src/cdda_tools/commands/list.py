@@ -1,9 +1,8 @@
 """List items on Overmap tile."""
 import argparse
 import os.path
-import sys
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 
@@ -17,47 +16,18 @@ class List(Command):
             description="List things at an overmap position (could be considered cheating!).",
             formatter_class=argparse.RawTextHelpFormatter,
         )
-        parser.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world serch in",
-        )
 
-        parser.add_argument(
-            "x",
-            type=str,
-            help="x coordinate in overmap format -1'179 "
-            '(quote neg. numbers, with a space: " -1\'32")',
-        )
-        parser.add_argument(
-            "y",
-            type=str,
-            help="y coordinate in overmap format -1'179",
-        )
-        parser.add_argument(
-            "--z-levels",
-            "-z",
-            type=int,
-            nargs="+",
-            default=list(range(-10, 11)),
-            help="restrict to z-levels",
-        )
+        util.add_world_option(parser, "the game world search in")
+
+        util.add_xy_options(parser)
+
+        util.add_z_level_options(parser)
 
     def exec(self, arg):
         # pylint: disable=too-many-locals
-
         world_dir = util.get_world_path(arg.dir, arg.world)
 
-        for level in arg.z_levels:
-            if level < -10 or level > 10:
-                print(
-                    "Unsupported z level: {}. Must be in range [-10, 10]".format(
-                        level,
-                    )
-                )
-                sys.exit(1)
+        util.check_levels(arg.z_levels)
 
         x_parts = list(map(int, arg.x.split("'")))
         y_parts = list(map(int, arg.y.split("'")))

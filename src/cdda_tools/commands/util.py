@@ -1,9 +1,11 @@
+"""Utility functions for CLI commands"""
 import glob
 import math
 import os
+import sys
 from os import path
 
-from .. import json
+from .. import json_utils as json
 
 SAVE_DIR = "save"
 MAPS_DIR = "maps"
@@ -14,12 +16,105 @@ SUBMAP_SIZE = 12
 MAP_CHUNK_SIZE = 32
 
 
+def add_world_option(parser, help_text):
+    """Adds default --world option to a parser"""
+    parser.add_argument(
+        "--world",
+        "-w",
+        type=str,
+        required=True,
+        help=help_text,
+    )
+
+
+def add_world2_option(parser, help_text):
+    """Adds default --world2 option to a parser"""
+    parser.add_argument(
+        "--world2",
+        "-w2",
+        type=str,
+        required=True,
+        help=help_text,
+    )
+
+
+def add_vehicle_option(parser, help_text):
+    """Adds default --world option to a parser"""
+    parser.add_argument(
+        "--vehicle",
+        "-v",
+        type=str,
+        required=True,
+        help=help_text,
+    )
+
+
+def add_xy_options(parser):
+    """Adds default x y option to a parser"""
+    parser.add_argument(
+        "x",
+        type=str,
+        help="x coordinate in overmap format -1'179 "
+        '(quote neg. numbers, with a space: " -1\'32")',
+    )
+    parser.add_argument(
+        "y",
+        type=str,
+        help="y coordinate in overmap format -1'179"
+        '(quote neg. numbers, with a space: " -1\'32")',
+    )
+
+
+def add_z_level_options(parser):
+    """Adds default z level option to a parser"""
+    parser.add_argument(
+        "x",
+        type=str,
+        help="x coordinate in overmap format -1'179 "
+        '(quote neg. numbers, with a space: " -1\'32")',
+    )
+    parser.add_argument(
+        "y",
+        type=str,
+        help="y coordinate in overmap format -1'179"
+        '(quote neg. numbers, with a space: " -1\'32")',
+    )
+
+
+def check_is_single_vehicle_source(source_maps, name):
+    """
+    Checks that only a single element is passed,
+    and exits with vehicle-specific error message otherwise.
+    """
+    if len(source_maps) == 0:
+        print("Could not find source vehicle '{}'".format(name))
+        sys.exit(1)
+    if len(source_maps) > 1:
+        print(
+            "Found multiple files for source vehicle name '{}'.\n"
+            "Please rename the vehicle to something unique.".format(name)
+        )
+        sys.exit(1)
+
+
+def check_levels(levels):
+    """Checks that all z levels are in range [-10, 10]. Prints message and exits otherwise."""
+    for level in levels:
+        if level < -10 or level > 10:
+            print(
+                "Unsupported z level: {}. Must be in range [-10, 10]".format(
+                    level,
+                )
+            )
+            sys.exit(1)
+
+
 def get_world_path(directory: str, world: str) -> str:
     """Constructs and checks the world's save path"""
     world_dir = path.join(directory, SAVE_DIR, world)
     if not path.isdir(world_dir):
         print("World directory {} does not exist.".format(world_dir))
-        exit(1)
+        sys.exit(1)
 
     return world_dir
 
@@ -29,7 +124,7 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
     sav_files = glob.glob(path.join(world_dir, "*.sav"))
     if not sav_files:
         print("No saved characters found in world directory {}.".format(world_dir))
-        exit(1)
+        sys.exit(1)
 
     players = []
 
@@ -43,7 +138,7 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
                 world_dir
             )
         )
-        exit(1)
+        sys.exit(1)
 
     if player not in players:
         print(
@@ -51,37 +146,35 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
                 player, world_dir, ", ".join(players)
             )
         )
-        exit(1)
+        sys.exit(1)
 
-    pl = players[0] if player is None else player
-    pos = players.index(pl)
+    player_name = players[0] if player is None else player
+    pos = players.index(player_name)
 
     save_name = sav_files[pos][len(world_dir) + 1 : -4]
 
-    return sav_files[pos], save_name, pl
+    return sav_files[pos], save_name, player_name
 
 
-def file_contains(p: str, text: str) -> bool:
+def file_contains(file_path: str, text: str) -> bool:
     """Tests is a file's content contains given text"""
-    file = open(p, "r")
-    content = file.read()
-    cont = text in content
-    file.close()
+    with open(file_path, "r", encoding="utf-8") as file:
+        content = file.read()
+        cont = text in content
     return cont
 
 
-def read_file(p: str) -> str:
+def read_file(file_path: str) -> str:
     """Read a text file"""
-    file = open(p, "r")
-    content = file.read()
-    file.close()
+    with open(file_path, "r", encoding="utf-8") as file:
+        content = file.read()
     return content
 
 
-def find_files_with_text(p, text):
+def find_files_with_text(dir_path, text):
     """Collects all files with content containing text, recursively."""
     files = []
-    for map_dir in os.walk(p):
+    for map_dir in os.walk(dir_path):
         for map_file in map_dir[2]:
             file_path = path.join(map_dir[0], map_file)
             if file_contains(file_path, text):
@@ -91,29 +184,31 @@ def find_files_with_text(p, text):
 
 def index_to_xy_overmap(idx):
     """Converts the index of a flat 180x180 overmap array into relative overmap tile coors"""
-    x = idx % OVERMAP_SIZE
-    y = idx // OVERMAP_SIZE
-    return x, y
+    x_coord = idx % OVERMAP_SIZE
+    y_coord = idx // OVERMAP_SIZE
+    return x_coord, y_coord
 
 
-def coord_to_map(x1, x2, y1, y2):
+def coord_to_map(x_major, x_minor, y_major, y_minor):
     """Converts overmap coords of format (1'123, -1'50) to absolute overmap tile coords"""
-    return OVERMAP_SIZE * x1 + x2, OVERMAP_SIZE * y1 + y2
+    return OVERMAP_SIZE * x_major + x_minor, OVERMAP_SIZE * y_major + y_minor
 
 
-def map_to_chunk(x, y):
+def map_to_chunk(x_coord, y_coord):
     """Converts absolute overmap tile coords to map chunk/directory coords"""
-    xx = x / MAP_CHUNK_SIZE
-    yy = y / MAP_CHUNK_SIZE
+    x_chunk = x_coord / MAP_CHUNK_SIZE
+    y_chunk = y_coord / MAP_CHUNK_SIZE
 
-    xx = int(math.floor(xx))
-    yy = int(math.floor(yy))
+    x_chunk = int(math.floor(x_chunk))
+    y_chunk = int(math.floor(y_chunk))
 
-    return xx, yy
+    return x_chunk, y_chunk
 
 
-def note_to_str(note, omxy=["?", "?"]):
+def note_to_str(note, omxy=None):
     """Formats a note for printing"""
+    if omxy is None:
+        omxy = ["?", "?"]
     return "{}{:3} | {}'{:3} {}'{:3} | {}".format(
         "!" if note[3] else " ",
         note[4] if note[3] else " ",
