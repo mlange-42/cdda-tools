@@ -1,5 +1,7 @@
+"""List items on Overmap tile."""
 import argparse
 import os.path
+import sys
 
 from .. import json
 from . import Command, util
@@ -26,7 +28,8 @@ class List(Command):
         parser.add_argument(
             "x",
             type=str,
-            help="x coordinate in overmap format -1'179 (quote neg. numbers, with a space: \" -1'32\")",
+            help="x coordinate in overmap format -1'179 "
+            '(quote neg. numbers, with a space: " -1\'32")',
         )
         parser.add_argument(
             "y",
@@ -43,28 +46,30 @@ class List(Command):
         )
 
     def exec(self, arg):
+        # pylint: disable=too-many-locals
+
         world_dir = util.get_world_path(arg.dir, arg.world)
 
-        for l in arg.z_levels:
-            if l < -10 or l > 10:
+        for level in arg.z_levels:
+            if level < -10 or level > 10:
                 print(
                     "Unsupported z level: {}. Must be in range [-10, 10]".format(
-                        l,
+                        level,
                     )
                 )
-                exit(1)
+                sys.exit(1)
 
         x_parts = list(map(int, arg.x.split("'")))
         y_parts = list(map(int, arg.y.split("'")))
 
-        x, y = util.coord_to_map(*x_parts, *y_parts)
-        cx, cy = util.map_to_chunk(x, y)
+        map_x, map_y = util.coord_to_map(*x_parts, *y_parts)
+        chunk_x, chunk_y = util.map_to_chunk(map_x, map_y)
         map_files = [
             os.path.join(
                 world_dir,
                 util.MAPS_DIR,
-                "{}.{}.{}".format(cx, cy, z),
-                "{}.{}.{}.map".format(x, y, z),
+                "{}.{}.{}".format(chunk_x, chunk_y, z),
+                "{}.{}.{}.map".format(map_x, map_y, z),
             )
             for z in arg.z_levels
         ]
@@ -76,23 +81,23 @@ class List(Command):
                 continue
 
             map_json = json.read_json(file)
-            for m in map_json:
-                items = m["items"]
+            for map_chunk in map_json:
+                items = map_chunk["items"]
                 for i in range(len(items) // 3):
                     items_here = items[i * 3 + 2]
-                    id = ""
+                    item_id = ""
                     count = 1
                     for item in items_here:
                         if isinstance(item, list):
-                            id = item[0]["typeid"]
+                            item_id = item[0]["typeid"]
                             count = item[1]
                         else:
-                            id = item["typeid"]
+                            item_id = item["typeid"]
 
-                    if id in collect:
-                        collect[id] += count
+                    if item_id in collect:
+                        collect[item_id] += count
                     else:
-                        collect[id] = count
+                        collect[item_id] = count
 
         keys = list(collect.keys())
         keys.sort()

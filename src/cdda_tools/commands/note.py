@@ -1,4 +1,6 @@
+"""Add Overmap notes."""
 import argparse
+import sys
 from os import path
 
 from .. import json
@@ -32,7 +34,8 @@ class Note(Command):
         parser.add_argument(
             "x",
             type=str,
-            help="x coordinate in overmap format -1'179 (quote neg. numbers, with a space: \" -1'32\")",
+            help="x coordinate in overmap format -1'179 "
+            '(quote neg. numbers, with a space: " -1\'32")',
         )
         parser.add_argument(
             "y",
@@ -79,18 +82,18 @@ class Note(Command):
                     arg.z,
                 )
             )
-            exit(1)
+            sys.exit(1)
 
         if len(arg.symbol) != 1:
             print("Note symbol must be exactly one character")
-            exit(1)
+            sys.exit(1)
 
         if len(arg.color) < 1 or len(arg.color) > 2:
             print("Note color argument must be a string of 1 or 2 characters!")
-            exit(1)
+            sys.exit(1)
 
         world_dir = util.get_world_path(arg.dir, arg.world)
-        save, save_name, player = util.get_save_path(world_dir, arg.player)
+        _, save_name, _ = util.get_save_path(world_dir, arg.player)
 
         text = " ".join(arg.note)
         x_parts = list(map(int, arg.x.split("'")))

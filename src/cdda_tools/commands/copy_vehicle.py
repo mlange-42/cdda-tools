@@ -1,7 +1,7 @@
 """Copy a vehicle between worlds"""
 import argparse
-from os import path
 import sys
+from os import path
 
 from .. import json
 from . import Command, util
@@ -71,9 +71,7 @@ class CopyVehicle(Command):
         if len(source_maps) > 1:
             print(
                 "Found multiple files for source vehicle name '{}'.\n"
-                "Please rename the vehicle to something unique.".format(
-                    arg.vehicle
-                )
+                "Please rename the vehicle to something unique.".format(arg.vehicle)
             )
             sys.exit(1)
 
@@ -83,9 +81,7 @@ class CopyVehicle(Command):
         if len(target_maps) > 1:
             print(
                 "Found multiple files for target vehicle name '{}'.\n"
-                "Please rename the vehicle to something unique.".format(
-                    arg.vehicle2
-                )
+                "Please rename the vehicle to something unique.".format(arg.vehicle2)
             )
             sys.exit(1)
 
@@ -127,9 +123,7 @@ def _find_vehicle(sources, name):
                 if vehicle is not None:
                     print(
                         "Found multiple vehicles for source name '{}'.\n"
-                        "Please rename the vehicle to something unique.".format(
-                            name
-                        )
+                        "Please rename the vehicle to something unique.".format(name)
                     )
                     sys.exit(1)
                 else:
