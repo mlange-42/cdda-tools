@@ -1,3 +1,7 @@
+"""
+CLI commands.
+"""
+# pylint: disable=cyclic-import
 from . import util
 from .command import Command
 from .copy_player import CopyPlayer

@@ -1,11 +1,14 @@
+"""Base class for CLI commands"""
 from abc import ABC, abstractmethod
 
 
 class Command(ABC):
+    """Base class for CLI commands"""
+
     @abstractmethod
     def add_subcommand(self, subparsers):
-        pass
+        """Fill the parser with sub-parser and arguments"""
 
     @abstractmethod
     def exec(self, arg):
-        pass
+        """Execute the command"""

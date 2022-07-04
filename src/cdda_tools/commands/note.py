@@ -1,11 +1,15 @@
+"""Add Overmap notes."""
 import argparse
+import sys
 from os import path
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 
 class Note(Command):
+    """Add Overmap notes."""
+
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "note",
@@ -14,29 +18,17 @@ class Note(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world serch in",
-        )
+        util.add_world_option(parser, "the game world to add a note")
+
         parser.add_argument(
             "--player",
             "-p",
             type=str,
             help="the player to rearch for",
         )
-        parser.add_argument(
-            "x",
-            type=str,
-            help="x coordinate in overmap format -1'179 (quote neg. numbers, with a space: \" -1'32\")",
-        )
-        parser.add_argument(
-            "y",
-            type=str,
-            help="y coordinate in overmap format -1'179",
-        )
+
+        util.add_xy_options(parser)
+
         parser.add_argument(
             "z",
             type=int,
@@ -77,18 +69,18 @@ class Note(Command):
                     arg.z,
                 )
             )
-            exit(1)
+            sys.exit(1)
 
         if len(arg.symbol) != 1:
             print("Note symbol must be exactly one character")
-            exit(1)
+            sys.exit(1)
 
         if len(arg.color) < 1 or len(arg.color) > 2:
             print("Note color argument must be a string of 1 or 2 characters!")
-            exit(1)
+            sys.exit(1)
 
         world_dir = util.get_world_path(arg.dir, arg.world)
-        save, save_name, player = util.get_save_path(world_dir, arg.player)
+        _, save_name, _ = util.get_save_path(world_dir, arg.player)
 
         text = " ".join(arg.note)
         x_parts = list(map(int, arg.x.split("'")))

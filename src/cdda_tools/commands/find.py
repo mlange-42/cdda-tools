@@ -1,15 +1,19 @@
+"""Find Overmap features"""
 import argparse
 import glob
+import sys
 from fnmatch import translate
 from os import path
 
 import regex
 
-from .. import json
+from .. import json_utils as json
 from . import Command, util
 
 
 class Find(Command):
+    """Find Overmap features"""
+
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "find",
@@ -18,18 +22,13 @@ class Find(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world serch in",
-        )
+        util.add_world_option(parser, "the game world search in")
+
         parser.add_argument(
             "--player",
             "-p",
             type=str,
-            help="the player to rearch for",
+            help="the player to search for",
         )
 
         subparsers = parser.add_subparsers(
@@ -37,65 +36,56 @@ class Find(Command):
             dest="find_subparser",
         )
 
-        self._add_parser_terrain(subparsers)
-
-    def _add_parser_terrain(self, subparsers):
-        parser_terrain = subparsers.add_parser(
-            "terrain",
-            help="Find overmap terrain types by glob patterns.",
-            description="Find overmap terrain types by glob patterns.",
-            formatter_class=argparse.RawTextHelpFormatter,
-        )
-        parser_terrain.add_argument(
-            "patterns",
-            type=str,
-            nargs="+",
-            help="glob patterns to search for",
-        )
-        parser_terrain.add_argument(
-            "--z-levels",
-            "-z",
-            type=int,
-            nargs="+",
-            default=list(range(-10, 11)),
-            help="restrict to z-levels",
-        )
-        parser_terrain.add_argument(
-            "--unseen",
-            "-U",
-            action="store_true",
-            help="search also for unseen terrain (could be considered cheating!)",
-        )
+        _add_parser_terrain(subparsers)
 
     def exec(self, arg):
         if arg.find_subparser == "terrain":
             find_terrain(arg)
         else:
             print("Unknown find sub-command '{}'.".format(arg.find_subparser))
-            exit(1)
+            sys.exit(1)
+
+
+def _add_parser_terrain(subparsers):
+    parser_terrain = subparsers.add_parser(
+        "terrain",
+        help="Find overmap terrain types by glob patterns.",
+        description="Find overmap terrain types by glob patterns.",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser_terrain.add_argument(
+        "patterns",
+        type=str,
+        nargs="+",
+        help="glob patterns to search for",
+    )
+
+    util.add_z_level_options(parser_terrain)
+
+    parser_terrain.add_argument(
+        "--unseen",
+        "-U",
+        action="store_true",
+        help="search also for unseen terrain (could be considered cheating!)",
+    )
 
 
 def _is_seen(seen_layer, index):
     pos = 0
-    for seen, le in seen_layer:
-        if index < pos + le:
+    for seen, run_length in seen_layer:
+        if index < pos + run_length:
             return seen
-        pos += le
+        pos += run_length
     raise ValueError("Index {} out of range of seen layer (len=pos).".format(index))
 
 
 def find_terrain(arg):
-    for l in arg.z_levels:
-        if l < -10 or l > 10:
-            print(
-                "Unsupported z level: {}. Must be in range [-10, 10]".format(
-                    l,
-                )
-            )
-            exit(1)
+    """Execute the find terrain command"""
+    # pylint: disable=too-many-locals
+    util.check_levels(arg.z_levels)
 
     world_dir = util.get_world_path(arg.dir, arg.world)
-    save, save_name, player = util.get_save_path(world_dir, arg.player)
+    _, save_name, player = util.get_save_path(world_dir, arg.player)
 
     print(
         "Searching for terrain in {} ({})".format(
@@ -110,29 +100,30 @@ def find_terrain(arg):
 
     rex = [regex.compile(translate(pat)) for pat in arg.patterns]
 
-    for map_file, seen_file, xy in zip(files_overmap, seen_files, seen_coords):
+    # pylint: disable=too-many-nested-blocks
+    for map_file, seen_file, coord in zip(files_overmap, seen_files, seen_coords):
         map_json = json.read_json(map_file)
         seen_json = json.read_json(seen_file)
         layers = map_json["layers"]
         seen_layers = seen_json["visible"]
-        for l in arg.z_levels:
-            layer = layers[l + 10]
-            seen_layer = seen_layers[l + 10]
+        for level in arg.z_levels:
+            layer = layers[level + 10]
+            seen_layer = seen_layers[level + 10]
             pos = 0
             for rle in layer:
                 match = False
-                for re in rex:
-                    if regex.match(re, rle[0]):
+                for expr in rex:
+                    if regex.match(expr, rle[0]):
                         match = True
                         break
                 if match:
                     for i in range(rle[1]):
                         index = pos + i
                         if arg.unseen or _is_seen(seen_layer, index):
-                            xx, yy = util.index_to_xy_overmap(index)
+                            x_sub, y_sub = util.index_to_xy_overmap(index)
                             print(
                                 "{}'{}, {}'{}, {}: {}".format(
-                                    xy[0], xx, xy[1], yy, l, rle[0]
+                                    coord[0], x_sub, coord[1], y_sub, level, rle[0]
                                 )
                             )
                 pos += rle[1]

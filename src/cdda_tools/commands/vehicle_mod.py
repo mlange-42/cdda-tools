@@ -1,16 +1,20 @@
+"""Create a mod file from an in-game vehicle."""
 import argparse
 import json
+import sys
 from os import path
 
-from .. import json as cjson
+from .. import json_utils
 from . import Command, util
 
-TANKS = set(["tank", "tank_medium", "tank_small", "external_tank"])
+TANKS = {"tank", "tank_medium", "tank_small", "external_tank"}
 
 
 class VehicleMod(Command):
+    """Create a mod file from an in-game vehicle."""
+
     def add_subcommand(self, subparsers):
-        parser_copy_player = subparsers.add_parser(
+        parser = subparsers.add_parser(
             "vehicle-mod",
             help="Creates a mod file from an in-game vehicle.",
             description="Creates a mod file from an in-game vehicle.\n\n"
@@ -19,28 +23,20 @@ class VehicleMod(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser_copy_player.add_argument(
-            "--world",
-            "-w",
-            type=str,
-            required=True,
-            help="the game world to search for the vehicle",
+        util.add_world_option(parser, "the game world to search for the vehicle")
+
+        util.add_vehicle_option(
+            parser, "the (unique!) name of the in-game vehicle to use"
         )
-        parser_copy_player.add_argument(
-            "--vehicle",
-            "-v",
-            type=str,
-            required=True,
-            help="the (unique!) name of the in-game vehicle to use",
-        )
-        parser_copy_player.add_argument(
+
+        parser.add_argument(
             "--id",
             "-i",
             type=str,
             required=True,
             help="the new vehicle's id string",
         )
-        parser_copy_player.add_argument(
+        parser.add_argument(
             "--no-items",
             action="store_true",
             help="do not add items to the mod vehicle",
@@ -51,19 +47,10 @@ class VehicleMod(Command):
         source_path = path.join(world_dir, util.MAPS_DIR)
         source_maps = util.find_files_with_text(source_path, arg.vehicle)
 
-        if len(source_maps) == 0:
-            print("Could not find source vehicle '{}'".format(arg.vehicle))
-            exit(1)
-        if len(source_maps) > 1:
-            print(
-                "Found multiple files for source vehicle name '{}'.\nPlease rename the vehicle to something unique.".format(
-                    arg.vehicle
-                )
-            )
-            exit(1)
+        util.check_is_single_vehicle_source(source_maps, arg.vehicle)
 
         source_map = source_maps[0]
-        sources = cjson.read_json(source_map)
+        sources = json_utils.read_json(source_map)
         source_vehicle = None
 
         for source in sources:
@@ -71,26 +58,31 @@ class VehicleMod(Command):
                 if veh["name"] == arg.vehicle:
                     if source_vehicle is not None:
                         print(
-                            "Found multiple vehicles for source name '{}'.\nPlease rename the vehicle to something unique.".format(
+                            "Found multiple vehicles for name '{}'.\n"
+                            "Please rename the vehicle to something unique.".format(
                                 arg.vehicle
                             )
                         )
-                        exit(1)
+                        sys.exit(1)
                     else:
                         source_vehicle = veh
 
         if source_vehicle is None:
-            print("Could not find source vehicle '{}'".format(arg.vehicle))
-            exit(1)
+            print("Could not find vehicle '{}'".format(arg.vehicle))
+            sys.exit(1)
 
         mod_json = vehicle_to_mod(source_vehicle, arg.id, arg.no_items)
         print(json.dumps(mod_json, indent=4))
 
 
-def vehicle_to_mod(vehicle, id, no_items):
+def vehicle_to_mod(vehicle, vehicle_id, no_items):
+    """Converts a vehicle to a vehicle definition for mods"""
+    # pylint: disable=too-many-locals
+
     parts = []
     items = []
 
+    # pylint: disable=too-many-nested-blocks
     for part in vehicle["parts"]:
         part_id = part["id"]
         if "variant" in part:
@@ -101,9 +93,9 @@ def vehicle_to_mod(vehicle, id, no_items):
             if "contents" in base:
                 for cont in base["contents"]["contents"]:
                     fuel_type = None
-                    for c in cont["contents"]:
-                        if "typeid" in c:
-                            fuel_type = c["typeid"]
+                    for content in cont["contents"]:
+                        if "typeid" in content:
+                            fuel_type = content["typeid"]
                     if fuel_type is not None:
                         part_def["fuel"] = fuel_type
 
@@ -121,7 +113,7 @@ def vehicle_to_mod(vehicle, id, no_items):
                     "items": item["typeid"],
                 }
 
-                for i in range(count):
+                for _ in range(count):
                     items.append(item_def)
 
         parts.append(part_def)
@@ -129,7 +121,7 @@ def vehicle_to_mod(vehicle, id, no_items):
     parts.sort(key=lambda p: abs(p["x"]) + abs(p["y"]))
 
     obj = {
-        "id": id,
+        "id": vehicle_id,
         "type": "vehicle",
         "name": vehicle["name"],
         "blueprint": [["+"]],

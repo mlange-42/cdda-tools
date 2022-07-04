@@ -25,6 +25,6 @@ jobs:
       - name: Lint with isort
         run: |
           isort --check --diff --color .
-#      - name: Lint with pylint
-#        run: |
-#          pylint src/cdda_tools
+      - name: Lint with pylint
+        run: |
+          pylint src/cdda_tools

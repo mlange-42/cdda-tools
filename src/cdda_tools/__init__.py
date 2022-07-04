@@ -1,8 +1,8 @@
 """
-Cataclysm DDA Python tools.
+Cataclysm DDA Python tools, package entrypoint.
 """
 
-from . import commands, json
+from . import commands, json_utils
 
 try:
     from ._version import __version__
