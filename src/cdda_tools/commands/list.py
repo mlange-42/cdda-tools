@@ -13,7 +13,9 @@ class List(Command):
         parser = subparsers.add_parser(
             "list",
             help="List things at an overmap position (could be considered cheating!).",
-            description="List things at an overmap position (could be considered cheating!).",
+            description="List things at an overmap position (could be considered cheating!).\n\n"
+            "Example:\n\n"
+            "  cdda_tools list -w MyWorld \" -1'123\" 1'10",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 

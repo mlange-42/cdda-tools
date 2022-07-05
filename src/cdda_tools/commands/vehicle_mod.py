@@ -16,10 +16,13 @@ class VehicleMod(Command):
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "vehicle-mod",
-            help="Creates a mod file from an in-game vehicle.",
-            description="Creates a mod file from an in-game vehicle.\n\n"
+            help="Create a mod file from an in-game vehicle.",
+            description="Create a mod file from an in-game vehicle.\n\n"
             "  1. Give the vehicle a unique name in-game\n"
-            "  2. Use this command",
+            "  2. Use this command\n\n"
+            "Examples:\n\n"
+            '  cdda_tools vehicle-mod -w MyWorld -v "My Death Mobile" --id death_mobile '
+            "> my_death_mobile.json",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 

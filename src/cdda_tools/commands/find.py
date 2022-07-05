@@ -18,7 +18,9 @@ class Find(Command):
         parser = subparsers.add_parser(
             "find",
             help="Find terrain or items.",
-            description="Find terrain or items.",
+            description="Find terrain or items.\n\n"
+            "Example:\n\n"
+            "  cdda_tools find -w MyWorld -p MyPlayer terrain *subway* -z 0",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
