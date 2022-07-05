@@ -140,7 +140,7 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
             )
         )
 
-    if player not in players:
+    if player is not None and player not in players:
         raise ValueError(
             "Player '{}' not found in world directory {}. Found {}.".format(
                 player, world_dir, ", ".join(players)
