@@ -17,7 +17,7 @@ jobs:
           pip install --editable .[test]
       - name: Install SVN
         run: |
-          apt-get install subversion
+          sudo apt-get install subversion
       - name: Download game data
         run: |
           mkdir cdda
