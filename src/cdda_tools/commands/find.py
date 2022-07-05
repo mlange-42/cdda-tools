@@ -1,7 +1,6 @@
 """Find Overmap features"""
 import argparse
 import glob
-import sys
 from fnmatch import translate
 from os import path
 
@@ -44,8 +43,9 @@ class Find(Command):
         if arg.find_subparser == "terrain":
             find_terrain(arg)
         else:
-            print("Unknown find sub-command '{}'.".format(arg.find_subparser))
-            sys.exit(1)
+            raise ValueError(
+                "Unknown find sub-command '{}'.".format(arg.find_subparser)
+            )
 
 
 def _add_parser_terrain(subparsers):

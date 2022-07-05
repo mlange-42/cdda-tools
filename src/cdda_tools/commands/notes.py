@@ -2,7 +2,6 @@
 import argparse
 import glob
 import os
-import sys
 from fnmatch import translate
 from os import path
 
@@ -82,8 +81,9 @@ class Notes(Command):
                 seen_files, arg.patterns, arg.ignore, arg.replace, arg.case, arg.dry
             )
         else:
-            print("Unknown notes sub-command '{}'.".format(arg.notes_subparser))
-            sys.exit(1)
+            raise ValueError(
+                "Unknown notes sub-command '{}'.".format(arg.notes_subparser)
+            )
 
 
 def matches(text, regex_arr, case_sensitive):
@@ -137,19 +137,16 @@ def list_notes(seen_files, patterns, ignore, danger, case_sensitive):
 def edit_notes(seen_files, patterns, ignore, symbol, color, text, case_sensitive, dry):
     """Edit notes by pattern"""
     if symbol is None and color is None and text is None:
-        print(
+        raise ValueError(
             "Notes sub-command 'edit' requires at least one of options"
             " --symbol/-s, --color/-c, --text/-t"
         )
-        sys.exit(1)
 
     if symbol is not None and len(symbol) != 1:
-        print("Symbol argument must be a single character!")
-        sys.exit(1)
+        raise ValueError("Symbol argument must be a single character!")
 
     if color is not None and (len(color) < 1 or len(color) > 2):
-        print("Color argument must be a string of 1 or 2 characters!")
-        sys.exit(1)
+        raise ValueError("Color argument must be a string of 1 or 2 characters!")
 
     def handle(note):
         print(util.note_to_str(note))
@@ -220,10 +217,9 @@ def note_tuple(note):
 def replace_in_notes(seen_files, patterns, ignore, replace, case_sensitive, dry):
     """Full-text replace in notes by pattern"""
     if len(replace) % 2 != 0:
-        print(
+        raise ValueError(
             "Option --replace requires an even number of arguments (search/replace pairs)"
         )
-        sys.exit(1)
 
     def handle(note):
         print(util.note_to_str(note))

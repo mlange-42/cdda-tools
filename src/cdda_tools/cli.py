@@ -2,7 +2,6 @@
 Cataclysm DDA Python tools, CLI functions.
 """
 import argparse
-import sys
 
 from . import commands
 
@@ -18,18 +17,21 @@ COMMANDS = {
 }
 
 
-def run_cli(args=None):
-    """Run the CLI with given arguments array"""
-    arg = parse_args(args)
+def run_cli(args):
+    """Run the CLI with parsed arguments (see parse_args(args))"""
+    if args.subparser not in COMMANDS:
+        raise ValueError("Unknown sub-command '{}'.".format(args.subparser))
 
-    if arg.subparser not in COMMANDS:
-        print("Unknown sub-command '{}'.".format(arg.subparser))
-        sys.exit(1)
-
-    COMMANDS[arg.subparser].exec(arg)
+    COMMANDS[args.subparser].exec(args)
 
 
-def create_parser():
+def parse_args(args=None):
+    """Parse arguments array"""
+    parser = _create_parser()
+    return parser.parse_args(args)
+
+
+def _create_parser():
     """Create the main argument parser"""
     parser = argparse.ArgumentParser(
         description="Cataclysm DDA Python tools.",
@@ -42,6 +44,11 @@ def create_parser():
         default=".",
         help="game directory, default '.'",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="debug mode, prints full error stack traces",
+    )
 
     subparsers = parser.add_subparsers(
         help="Sub-commands",
@@ -52,9 +59,3 @@ def create_parser():
         cmd.add_subcommand(subparsers)
 
     return parser
-
-
-def parse_args(args=None):
-    """Parse arguments"""
-    parser = create_parser()
-    return parser.parse_args(args)

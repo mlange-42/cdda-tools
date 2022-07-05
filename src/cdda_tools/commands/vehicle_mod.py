@@ -1,7 +1,6 @@
 """Create a mod file from an in-game vehicle."""
 import argparse
 import json
-import sys
 from os import path
 
 from .. import json_utils
@@ -60,19 +59,17 @@ class VehicleMod(Command):
             for veh in source["vehicles"]:
                 if veh["name"] == arg.vehicle:
                     if source_vehicle is not None:
-                        print(
+                        raise ValueError(
                             "Found multiple vehicles for name '{}'.\n"
                             "Please rename the vehicle to something unique.".format(
                                 arg.vehicle
                             )
                         )
-                        sys.exit(1)
-                    else:
-                        source_vehicle = veh
+
+                    source_vehicle = veh
 
         if source_vehicle is None:
-            print("Could not find vehicle '{}'".format(arg.vehicle))
-            sys.exit(1)
+            raise ValueError("Could not find vehicle '{}'".format(arg.vehicle))
 
         mod_json = vehicle_to_mod(source_vehicle, arg.id, arg.no_items)
         print(json.dumps(mod_json, indent=4))
