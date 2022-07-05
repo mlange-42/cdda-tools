@@ -2,7 +2,7 @@
 Cataclysm DDA Python tools, package entrypoint.
 """
 
-from . import commands, game, json_utils
+from . import cli, commands, game, json_utils
 
 try:
     from ._version import __version__

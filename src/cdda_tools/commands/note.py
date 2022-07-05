@@ -1,6 +1,5 @@
 """Add Overmap notes."""
 import argparse
-import sys
 from os import path
 
 from .. import json_utils as json
@@ -67,20 +66,19 @@ class Note(Command):
 
     def exec(self, arg):
         if arg.z < -10 or arg.z > 10:
-            print(
+            raise ValueError(
                 "Unsupported z level: {}. Must be in range [-10, 10]".format(
                     arg.z,
                 )
             )
-            sys.exit(1)
 
         if len(arg.symbol) != 1:
-            print("Note symbol must be exactly one character")
-            sys.exit(1)
+            raise ValueError("Note symbol must be exactly one character")
 
         if len(arg.color) < 1 or len(arg.color) > 2:
-            print("Note color argument must be a string of 1 or 2 characters!")
-            sys.exit(1)
+            raise ValueError(
+                "Note color argument must be a string of 1 or 2 characters!"
+            )
 
         world_dir = util.get_world_path(arg.dir, arg.world)
         _, save_name, _ = util.get_save_path(world_dir, arg.player)

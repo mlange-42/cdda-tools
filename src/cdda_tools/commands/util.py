@@ -2,7 +2,6 @@
 import glob
 import math
 import os
-import sys
 from os import path
 
 from .. import json_utils as json
@@ -92,34 +91,30 @@ def check_is_single_vehicle_source(source_maps, name):
     and exits with vehicle-specific error message otherwise.
     """
     if len(source_maps) == 0:
-        print("Could not find source vehicle '{}'".format(name))
-        sys.exit(1)
+        raise ValueError("Could not find source vehicle '{}'".format(name))
     if len(source_maps) > 1:
-        print(
+        raise ValueError(
             "Found multiple files for source vehicle name '{}'.\n"
             "Please rename the vehicle to something unique.".format(name)
         )
-        sys.exit(1)
 
 
 def check_levels(levels):
     """Checks that all z levels are in range [-10, 10]. Prints message and exits otherwise."""
     for level in levels:
         if level < -10 or level > 10:
-            print(
+            raise ValueError(
                 "Unsupported z level: {}. Must be in range [-10, 10]".format(
                     level,
                 )
             )
-            sys.exit(1)
 
 
 def get_world_path(directory: str, world: str) -> str:
     """Constructs and checks the world's save path"""
     world_dir = path.join(directory, SAVE_DIR, world)
     if not path.isdir(world_dir):
-        print("World directory {} does not exist.".format(world_dir))
-        sys.exit(1)
+        raise ValueError("World directory {} does not exist.".format(world_dir))
 
     return world_dir
 
@@ -128,8 +123,9 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
     """Get player save location: (.sav file path, file base name, player name)"""
     sav_files = glob.glob(path.join(world_dir, "*.sav"))
     if not sav_files:
-        print("No saved characters found in world directory {}.".format(world_dir))
-        sys.exit(1)
+        raise ValueError(
+            "No saved characters found in world directory {}.".format(world_dir)
+        )
 
     players = []
 
@@ -138,20 +134,18 @@ def get_save_path(world_dir: str, player: str) -> (str, str, str):
         players.append(character_data["player"]["name"])
 
     if len(players) > 1 and player is None:
-        print(
+        raise ValueError(
             "Multiple players in world directory {}. Requires option --player/-p.".format(
                 world_dir
             )
         )
-        sys.exit(1)
 
     if player not in players:
-        print(
+        raise ValueError(
             "Player '{}' not found in world directory {}. Found {}.".format(
                 player, world_dir, ", ".join(players)
             )
         )
-        sys.exit(1)
 
     player_name = players[0] if player is None else player
     pos = players.index(player_name)

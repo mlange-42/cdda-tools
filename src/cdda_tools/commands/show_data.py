@@ -1,7 +1,6 @@
 """Show game data."""
 import argparse
 import json
-import sys
 from fnmatch import translate
 
 import regex
@@ -38,8 +37,9 @@ class ShowData(Command):
         elif arg.show_subparser == "pairs":
             _pairs(arg)
         else:
-            print("Unknown show-data sub-command '{}'.".format(arg.show_subparser))
-            sys.exit(1)
+            raise ValueError(
+                "Unknown show-data sub-command '{}'.".format(arg.show_subparser)
+            )
 
 
 def _add_parser_path(subparsers):
@@ -142,8 +142,7 @@ def _hierarchical(arg):
             if key in extract:
                 extract = extract[key]
             else:
-                print(f"Id {key} not found in {search_str}")
-                sys.exit(1)
+                raise ValueError(f"Id {key} not found in {search_str}")
             search_str += f" --> {key}"
 
     if arg.keys:
@@ -158,8 +157,7 @@ def _hierarchical(arg):
 
 def _search(arg):
     if arg.list and arg.keys:
-        print("Options --list and --keys are mutually exclusive.")
-        sys.exit(1)
+        raise ValueError("Options --list and --keys are mutually exclusive.")
 
     data = game.read_game_data(arg.dir)
 
@@ -196,12 +194,12 @@ def _pairs(arg):
     # pylint: disable=too-many-branches
 
     if arg.list and arg.keys:
-        print("Options --list and --keys are mutually exclusive.")
-        sys.exit(1)
+        raise ValueError("Options --list and --keys are mutually exclusive.")
 
     if len(arg.values) % 2 != 0:
-        print("Option 'values' requires an even number of arguments (key/value pairs).")
-        sys.exit(1)
+        raise ValueError(
+            "Option 'values' requires an even number of arguments (key/value pairs)."
+        )
 
     data = game.read_game_data(arg.dir)
 
@@ -259,5 +257,4 @@ def _pairs(arg):
 
 def _check_is_dict(entry, search_str):
     if not isinstance(entry, dict):
-        print(f"Not a dictionary at data -> {search_str}")
-        sys.exit(1)
+        raise ValueError(f"Not a dictionary at data -> {search_str}")

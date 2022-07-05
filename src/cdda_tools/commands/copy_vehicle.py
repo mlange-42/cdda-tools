@@ -1,6 +1,5 @@
 """Copy a vehicle between worlds"""
 import argparse
-import sys
 from os import path
 
 from .. import json_utils as json
@@ -70,11 +69,9 @@ class CopyVehicle(Command):
         target_vehicle = _find_vehicle(targets, arg.vehicle2)
 
         if source_vehicle is None:
-            print("Could not find source vehicle '{}'".format(arg.vehicle))
-            sys.exit(1)
+            raise ValueError("Could not find source vehicle '{}'".format(arg.vehicle))
         if target_vehicle is None:
-            print("Could not find target vehicle '{}'".format(arg.vehicle2))
-            sys.exit(1)
+            raise ValueError("Could not find target vehicle '{}'".format(arg.vehicle2))
 
         target_vehicle["parts"] = source_vehicle["parts"]
 
@@ -94,12 +91,11 @@ def _find_vehicle(sources, name):
         for veh in source["vehicles"]:
             if veh["name"] == name:
                 if vehicle is not None:
-                    print(
+                    raise ValueError(
                         "Found multiple vehicles for source name '{}'.\n"
                         "Please rename the vehicle to something unique.".format(name)
                     )
-                    sys.exit(1)
-                else:
-                    vehicle = veh
+
+                vehicle = veh
 
     return vehicle
