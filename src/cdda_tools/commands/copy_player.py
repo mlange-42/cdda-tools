@@ -121,7 +121,10 @@ class CopyPlayer(Command):
         target = json.read_json(save_2)
 
         for prop in PROPERTIES:
-            target["player"][prop] = source["player"][prop]
+            if prop in target["player"]:
+                target["player"][prop] = source["player"][prop]
+            elif prop in source["player"]:
+                del source["player"]
 
         if not arg.dry:
             json.write_json(target, save_2)
