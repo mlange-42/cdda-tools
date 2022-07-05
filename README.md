@@ -17,7 +17,7 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
    * Full-text search & replace
 * `note`: Add Overmap notes
 * `find`: Find Overmap terrain types, and maybe later also monsters and items
-* `show-data`: Browse the game's JSON data hierarchically or by ID search
+* `show-data`: Browse the game's JSON data hierarchically or by search
 
 ## Installation
 
@@ -117,5 +117,20 @@ cdda_tools show-data path TOOL wrench
 >     "id": "wrench",
 >     "type": "TOOL",
 >     "name": {
+> ...
+> ```
+
+List everything with `Cake` or `cake` in property `description`:
+
+```shell
+cdda_tools show-data pairs description *[Cc]ake* --list
+```
+
+> Output:
+> 
+> ```plaintext
+> achievement_lvl_7_cooking                          (achievement)
+> MISSION_pizzaiolo_4                                (mission_definition)
+> brown_bread                                        (COMESTIBLE)
 > ...
 > ```

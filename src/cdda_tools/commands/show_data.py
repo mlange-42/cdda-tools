@@ -7,7 +7,7 @@ from fnmatch import translate
 import regex
 
 from .. import game
-from . import Command, util
+from . import Command
 
 
 class ShowData(Command):
@@ -28,12 +28,15 @@ class ShowData(Command):
 
         _add_parser_path(subparsers)
         _add_parser_ids(subparsers)
+        _add_parser_pairs(subparsers)
 
     def exec(self, arg):
         if arg.show_subparser == "path":
             _hierarchical(arg)
         elif arg.show_subparser == "ids":
             _search(arg)
+        elif arg.show_subparser == "pairs":
+            _pairs(arg)
         else:
             print("Unknown show-data sub-command '{}'.".format(arg.show_subparser))
             sys.exit(1)
@@ -89,6 +92,35 @@ def _add_parser_ids(subparsers):
     )
 
 
+def _add_parser_pairs(subparsers):
+    parser_pairs = subparsers.add_parser(
+        "pairs",
+        help="print data for entries with matching key/value pairs",
+        description="print data for entries with matching key/value pairs",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    parser_pairs.add_argument(
+        "values",
+        type=str,
+        nargs="+",
+        help="key/value pairs, key is a property name, value is a glob pattern;\n"
+        "multiple pairs are possible and must all match",
+    )
+    parser_pairs.add_argument(
+        "--keys",
+        "-k",
+        action="store_true",
+        help="print only keys, not the complete data",
+    )
+    parser_pairs.add_argument(
+        "--list",
+        "-l",
+        action="store_true",
+        help="only list matches, don't print the full data",
+    )
+
+
 def _hierarchical(arg):
     data = game.read_game_data(arg.dir)
     extract = data
@@ -117,7 +149,7 @@ def _hierarchical(arg):
 
 def _search(arg):
     if arg.list and arg.keys:
-        print("Arguments --list and --keys are mutually exclusive.")
+        print("Options --list and --keys are mutually exclusive.")
         sys.exit(1)
 
     data = game.read_game_data(arg.dir)
@@ -147,7 +179,73 @@ def _search(arg):
                         print(f"----- Category {cat}: {key} -----")
                         print(json.dumps(entry, indent=4))
     if not any_found:
-        print(f"No data found for globs {arg.ids}")
+        print(f"No data found for globs {arg.values}")
+
+
+def _pairs(arg):
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+
+    if arg.list and arg.keys:
+        print("Options --list and --keys are mutually exclusive.")
+        sys.exit(1)
+
+    if len(arg.values) % 2 != 0:
+        print("Option 'values' requires an even number of arguments (key/value pairs).")
+        sys.exit(1)
+
+    data = game.read_game_data(arg.dir)
+
+    conditions = [
+        (arg.values[i], regex.compile(translate(arg.values[i + 1])))
+        for i in range(0, len(arg.values), 2)
+    ]
+
+    any_found = False
+    for cat, entries in data.items():
+        if isinstance(entries, dict):
+            entries_temp = entries.items()
+        else:
+            entries_temp = [("<unknown>", e) for e in entries]
+
+        for key, entry in entries_temp:
+            if not isinstance(entry, dict):
+                continue
+
+            match = True
+            for prop_name, expr in conditions:
+                prop_match = False
+                for prop, value in entry.items():
+                    val = str(value)
+                    if prop != prop_name:
+                        continue
+                    if regex.match(expr, str(val)):
+                        prop_match = True
+                        break
+                if not prop_match:
+                    match = False
+                    break
+
+            if not match:
+                continue
+
+            any_found = True
+
+            if arg.list:
+                print(f"{key:50} ({cat})")
+            elif arg.keys:
+                print(f"----- Category {cat}: {key} -----")
+                _check_is_dict(entry, f"{cat} --> {key}")
+
+                keys = list(entry.keys())
+                keys.sort()
+                print(keys)
+            else:
+                print(f"----- Category {cat}: {key} -----")
+                print(json.dumps(entry, indent=4))
+
+    if not any_found:
+        print(f"No data found for pairs {arg.values}")
 
 
 def _check_is_dict(entry, search_str):
