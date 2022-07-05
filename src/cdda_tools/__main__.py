@@ -21,3 +21,5 @@ if __name__ == "__main__":
                 "  cdda_tools --debug <command> ..."
             )
         sys.exit(1)
+
+    sys.exit(0)
