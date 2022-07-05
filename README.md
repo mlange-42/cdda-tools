@@ -18,6 +18,9 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 * `note`: Add Overmap notes by coordinates
 * `find`: Find Overmap terrain types (maybe later also monsters and items)
 
+The tools are built against the experimental version of Cataclysm DDA,
+so it may or may not work with stable releases.
+
 ## Installation
 
 ```shell
