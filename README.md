@@ -17,7 +17,7 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
    * Full-text search & replace
 * `note`: Add Overmap notes
 * `find`: Find Overmap terrain types, and maybe later also monsters and items
-* `show-data`: Browse the game's JSON data hierarchically or by ID search
+* `show-data`: Browse the game's JSON data hierarchically or by search
 
 ## Installation
 
@@ -78,7 +78,7 @@ cdda_tools notes -w World1 -p MyPlayer danger *[Mm]oose* --case --radius 2
 List all JSON entries with `wrench` in their ID:
 
 ```shell
-cdda_tools show-data *wrench* --search --list
+cdda_tools show-data ids *wrench* --list
 ```
 
 > Output:
@@ -93,7 +93,7 @@ cdda_tools show-data *wrench* --search --list
 Show all JSON categories:
 
 ```shell
-cdda_tools show-data --keys
+cdda_tools show-data path --keys
 ```
 
 > Output:
@@ -107,7 +107,7 @@ cdda_tools show-data --keys
 Show JSON entry for `wrench` of category `TOOL`:
 
 ```shell
-cdda_tools show-data TOOL wrench
+cdda_tools show-data path TOOL wrench
 ```
 
 > Output:
@@ -117,5 +117,20 @@ cdda_tools show-data TOOL wrench
 >     "id": "wrench",
 >     "type": "TOOL",
 >     "name": {
+> ...
+> ```
+
+List everything with `Cake` or `cake` in property `description`:
+
+```shell
+cdda_tools show-data pairs description *[Cc]ake* --list
+```
+
+> Output:
+> 
+> ```plaintext
+> achievement_lvl_7_cooking                          (achievement)
+> MISSION_pizzaiolo_4                                (mission_definition)
+> brown_bread                                        (COMESTIBLE)
 > ...
 > ```
