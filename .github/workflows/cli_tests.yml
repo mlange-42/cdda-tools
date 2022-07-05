@@ -1,9 +1,9 @@
-name: Tests
+name: CLI Tests
 
 on: [push]
 
 jobs:
-  tests:
+  cli_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -15,12 +15,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --editable .[test]
+      - name: Install SVN
+        run: |
+          apt-get install subversion
       - name: Download game data
         run: |
           mkdir cdda
           cd cdda
-          git init
-          git remote add -f origin https://github.com/CleverRaven/Cataclysm-DDA.git
-          git config core.sparseCheckout true
-          echo "data/json/" >> .git/info/sparse-checkout
-          git pull origin master
+          svn export https://github.com/CleverRaven/Cataclysm-DDA/trunk/data/json
+          ls
