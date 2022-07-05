@@ -17,8 +17,8 @@ jobs:
           pip install --editable .[test]
       - name: Download game data
         run: |
-          mkdir cdda
-          cd cdda
+          mkdir cdda-game-data
+          cd cdda-game-data
           git init
           git remote add -f origin https://github.com/CleverRaven/Cataclysm-DDA.git
           git config core.sparseCheckout true
@@ -26,3 +26,4 @@ jobs:
           git pull --depth 1 origin master
           git checkout master
           ls
+          cd ..
