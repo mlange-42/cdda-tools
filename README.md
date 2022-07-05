@@ -6,18 +6,17 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 
 ## Features
 
+* `show-data`: Browse the game's JSON data hierarchically or by search
 * `copy-player`: Copy player between worlds
 * `copy-vehicle`: Copy vehicle between worlds
 * `vehicle-mod`: Make mods from in-game vehicles
 * `notes`: Edit Overmap notes, filtered by glob pattern:
-   * List be search pattern
    * Delete notes
    * Mark/unmark dangerous
    * Replace symbol/color/text
    * Full-text search & replace
-* `note`: Add Overmap notes
-* `find`: Find Overmap terrain types, and maybe later also monsters and items
-* `show-data`: Browse the game's JSON data hierarchically or by search
+* `note`: Add Overmap notes by coordinates
+* `find`: Find Overmap terrain types (maybe later also monsters and items)
 
 ## Installation
 
@@ -49,6 +48,11 @@ Copy player `MyPlayer` from `World1` to `MyPlayer` in `World2`:
 ```shell
 cdda_tools copy-player -w World1 -p MyPlayer -w2 World2 -p2 MyPlayer
 ```
+
+> Note: You need to create `MyPlayer` in `World2` first. 
+> It will be replaced by the player from `World1`.
+
+Copying a vehicle basically works the same.
 
 ### Make a vehicle mod
 
