@@ -46,7 +46,10 @@ def _add_parser_path(subparsers):
     parser_path = subparsers.add_parser(
         "path",
         help="Show data by JSON path, like (type, id, [property...]).",
-        description="Show data by JSON path, like (type, id, [property...]).",
+        description="Show data by JSON path, like (type, id, [property...]).\n\n"
+        "Examples:\n\n"
+        "  cdda_tools show-data path TOOL wrench\n"
+        "  cdda_tools show-data path TOOL wrench name",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -68,7 +71,11 @@ def _add_parser_ids(subparsers):
     parser_ids = subparsers.add_parser(
         "ids",
         help="print data for IDs matching glob patterns",
-        description="print data for IDs matching glob patterns",
+        description="print data for IDs matching glob patterns.\n\n"
+        "Examples:\n\n"
+        "  cdda_tools show-data ids wrench\n"
+        "  cdda_tools show-data ids wrench --keys\n"
+        "  cdda_tools show-data ids *wrench* --list",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -96,7 +103,9 @@ def _add_parser_pairs(subparsers):
     parser_pairs = subparsers.add_parser(
         "pairs",
         help="print data for entries with matching key/value pairs",
-        description="print data for entries with matching key/value pairs",
+        description="print data for entries with matching key/value pairs\n\n"
+        "Examples:\n\n"
+        "  cdda_tools show-data pairs type recipe result *pancake*",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 

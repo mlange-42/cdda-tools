@@ -74,12 +74,13 @@ class CopyPlayer(Command):
     def add_subcommand(self, subparsers):
         parser = subparsers.add_parser(
             "copy-player",
-            help="Copies a player from one world to another.",
-            description="Copies a vehicle from one world to another\n\n"
+            help="Copy a player from one world to another.",
+            description="Copy a vehicle from one world to another\n\n"
             "  1. Create a player in the new world; it will be 'replaced' by the source player\n"
             "  2. Use this command with the names of the old and new worlds, "
-            "and the old and new players:\n"
-            "     cdda_tools copy-player -w OldWorld -p OldPlayer -w2 NewWorld -p2 NewPlayer",
+            "and the old and new players\n\n"
+            "Example:\n\n"
+            "  cdda_tools copy-player -w OldWorld -p OldPlayer -w2 NewWorld -p2 NewPlayer",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 

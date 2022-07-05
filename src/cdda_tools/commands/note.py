@@ -14,7 +14,10 @@ class Note(Command):
         parser = subparsers.add_parser(
             "note",
             help="Add an overmap note.",
-            description="Add an overmap note.",
+            description="Add an overmap note.\n\n"
+            "Example:\n\n"
+            "  cdda_tools note -w MyWorld -p MyPlayer "
+            '" -1\'123" 1\'10 0 ! R "Something dangerous" --danger 2',
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
@@ -32,7 +35,7 @@ class Note(Command):
         parser.add_argument(
             "z",
             type=int,
-            help="z coordinate in overmap format -1'179",
+            help="z level",
         )
         parser.add_argument(
             "symbol",

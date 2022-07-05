@@ -60,7 +60,7 @@ def add_xy_options(parser):
     parser.add_argument(
         "y",
         type=str,
-        help="y coordinate in overmap format -1'179"
+        help="y coordinate in overmap format -1'179 "
         '(quote neg. numbers, with a space: " -1\'32")',
     )
 
@@ -68,16 +68,12 @@ def add_xy_options(parser):
 def add_z_level_options(parser):
     """Adds default z level option to a parser"""
     parser.add_argument(
-        "x",
-        type=str,
-        help="x coordinate in overmap format -1'179 "
-        '(quote neg. numbers, with a space: " -1\'32")',
-    )
-    parser.add_argument(
-        "y",
-        type=str,
-        help="y coordinate in overmap format -1'179"
-        '(quote neg. numbers, with a space: " -1\'32")',
+        "--z-levels",
+        "-z",
+        type=int,
+        nargs="+",
+        default=list(range(-10, 10)),
+        help="a list of z-levels to process, default: all [-10, 10]",
     )
 
 

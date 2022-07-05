@@ -293,7 +293,10 @@ def _add_parser_list(subparsers):
     parser_list = subparsers.add_parser(
         "list",
         help="List overmap notes by pattern.",
-        description="List overmap notes by pattern.",
+        description="List overmap notes by pattern.\n\n"
+        "Examples:\n\n"
+        "  cdda_tools notes -w MyWorld -p MyPlayer list *\n"
+        "  cdda_tools notes -w MyWorld -p MyPlayer list *moose*",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_list.add_argument(
@@ -327,7 +330,9 @@ def _add_parser_delete(subparsers):
     parser_delete = subparsers.add_parser(
         "delete",
         help="Delete overmap notes by pattern.",
-        description="Delete overmap notes by pattern.",
+        description="Delete overmap notes by pattern.\n\n"
+        "Examples:\n\n"
+        '  cdda_tools notes -w MyWorld -p MyPlayer delete "*Dead Vegetation*"',
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_delete.add_argument(
@@ -356,7 +361,9 @@ def _add_parser_danger(subparsers):
     parser_danger = subparsers.add_parser(
         "danger",
         help="Mark/unmark overmap notes as dangerous, by pattern.",
-        description="Mark/unmark overmap notes as dangerous, by pattern.",
+        description="Mark/unmark overmap notes as dangerous, by pattern.\n\n"
+        "Examples:\n\n"
+        "  cdda_tools notes -w MyWorld -p MyPlayer danger *moose* --radius 2",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_danger.add_argument(
@@ -392,7 +399,9 @@ def _add_parser_edit(subparsers):
     parser_edit = subparsers.add_parser(
         "edit",
         help="Edit note symbol, color or text, by pattern.",
-        description="Edit note symbol, color or text, by pattern.",
+        description="Edit note symbol, color or text, by pattern.\n\n"
+        "Examples:\n\n"
+        "  cdda_tools notes -w MyWorld -p MyPlayer edit *moose* --symbol ! --color R",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_edit.add_argument(
@@ -426,7 +435,9 @@ def _add_parser_replace(subparsers):
     parser_replace = subparsers.add_parser(
         "replace",
         help="Full-text replacement, in notes matching pattern.",
-        description="Full-text replacement, in notes matching pattern.",
+        description="Full-text replacement, in notes matching pattern.\n\n"
+        "Examples:\n\n"
+        "  cdda_tools notes -w MyWorld -p MyPlayer replace * --replace moose !MOOSE! Moose !MOOSE!",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_replace.add_argument(
