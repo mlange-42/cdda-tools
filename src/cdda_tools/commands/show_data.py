@@ -7,7 +7,7 @@ from fnmatch import translate
 import regex
 
 from .. import game
-from . import Command
+from . import Command, util
 
 
 class ShowData(Command):
@@ -21,50 +21,81 @@ class ShowData(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
-        parser.add_argument(
-            "ids",
-            type=str,
-            nargs="*",
-            help="keys to print data for (category id [property...]), "
-            "or ID glob patterns to search for when using --search",
-        )
-        parser.add_argument(
-            "--keys",
-            "-k",
-            action="store_true",
-            help="print only keys, not the complete data",
-        )
-        parser.add_argument(
-            "--search",
-            "-s",
-            action="store_true",
-            help="search for IDs, instead of using the query hierarchically",
-        )
-        parser.add_argument(
-            "--list",
-            "-l",
-            action="store_true",
-            help="when used with --search, only list matches",
+        subparsers = parser.add_subparsers(
+            help="Show data sub-commands",
+            dest="show_subparser",
         )
 
+        _add_parser_path(subparsers)
+        _add_parser_ids(subparsers)
+
     def exec(self, arg):
-        if arg.search:
+        if arg.show_subparser == "path":
+            _hierarchical(arg)
+        elif arg.show_subparser == "ids":
             _search(arg)
         else:
-            _hierarchical(arg)
+            print("Unknown show-data sub-command '{}'.".format(arg.show_subparser))
+            sys.exit(1)
+
+
+def _add_parser_path(subparsers):
+    parser_path = subparsers.add_parser(
+        "path",
+        help="Show data by JSON path, like (type, id, [property...]).",
+        description="Show data by JSON path, like (type, id, [property...]).",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    parser_path.add_argument(
+        "values",
+        type=str,
+        nargs="*",
+        help="key path to print data for",
+    )
+    parser_path.add_argument(
+        "--keys",
+        "-k",
+        action="store_true",
+        help="print only keys, not the complete data",
+    )
+
+
+def _add_parser_ids(subparsers):
+    parser_ids = subparsers.add_parser(
+        "ids",
+        help="print data for IDs matching glob patterns",
+        description="print data for IDs matching glob patterns",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+    parser_ids.add_argument(
+        "values",
+        type=str,
+        nargs="*",
+        help="ID glob patterns to search for",
+    )
+    parser_ids.add_argument(
+        "--keys",
+        "-k",
+        action="store_true",
+        help="print only keys, not the complete data",
+    )
+    parser_ids.add_argument(
+        "--list",
+        "-l",
+        action="store_true",
+        help="only list matches, don't print the full data",
+    )
 
 
 def _hierarchical(arg):
-    if arg.list:
-        print("Argument --list can only be used with --search.")
-        sys.exit(1)
-
     data = game.read_game_data(arg.dir)
     extract = data
     search_str = "data"
 
-    if arg.ids is not None:
-        for key in arg.ids:
+    if arg.values is not None:
+        for key in arg.values:
             _check_is_dict(extract, search_str)
 
             if key in extract:
@@ -91,7 +122,7 @@ def _search(arg):
 
     data = game.read_game_data(arg.dir)
 
-    rex = [regex.compile(translate(pat)) for pat in arg.ids]
+    rex = [regex.compile(translate(pat)) for pat in arg.values]
     any_found = False
     for cat, entries in data.items():
         if isinstance(entries, dict):

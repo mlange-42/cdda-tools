@@ -78,7 +78,7 @@ cdda_tools notes -w World1 -p MyPlayer danger *[Mm]oose* --case --radius 2
 List all JSON entries with `wrench` in their ID:
 
 ```shell
-cdda_tools show-data *wrench* --search --list
+cdda_tools show-data ids *wrench* --list
 ```
 
 > Output:
@@ -93,7 +93,7 @@ cdda_tools show-data *wrench* --search --list
 Show all JSON categories:
 
 ```shell
-cdda_tools show-data --keys
+cdda_tools show-data path --keys
 ```
 
 > Output:
@@ -107,7 +107,7 @@ cdda_tools show-data --keys
 Show JSON entry for `wrench` of category `TOOL`:
 
 ```shell
-cdda_tools show-data TOOL wrench
+cdda_tools show-data path TOOL wrench
 ```
 
 > Output:
