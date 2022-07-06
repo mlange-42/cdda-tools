@@ -10,7 +10,8 @@ if __name__ == "__main__":
     args = cli.parse_args()
     debug = args.debug
     try:
-        cli.run_cli(args)
+        for line in cli.run_cli(args):
+            print(line)
     except Exception as e:  # pylint: disable=broad-except
         if debug:
             traceback.print_exc()

@@ -41,7 +41,7 @@ class Find(Command):
 
     def exec(self, arg):
         if arg.find_subparser == "terrain":
-            find_terrain(arg)
+            yield from find_terrain(arg)
         else:
             raise ValueError(
                 "Unknown find sub-command '{}'.".format(arg.find_subparser)
@@ -123,9 +123,8 @@ def find_terrain(arg):
                         index = pos + i
                         if arg.unseen or _is_seen(seen_layer, index):
                             x_sub, y_sub = util.index_to_xy_overmap(index)
-                            print(
-                                "{}'{}, {}'{}, {}: {}".format(
-                                    coord[0], x_sub, coord[1], y_sub, level, rle[0]
-                                )
+                            yield "{}'{}, {}'{}, {}: {}".format(
+                                coord[0], x_sub, coord[1], y_sub, level, rle[0]
                             )
+
                 pos += rle[1]

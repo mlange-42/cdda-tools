@@ -74,4 +74,4 @@ class List(Command):
         keys = list(collect.keys())
         keys.sort()
         for k in keys:
-            print("{} ({})".format(k, collect[k]))
+            yield "{:>4}  {}".format(collect[k], k)
