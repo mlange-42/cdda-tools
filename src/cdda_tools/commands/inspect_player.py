@@ -2,7 +2,7 @@
 import argparse
 import json
 
-from .. import json_utils
+from .. import game, json_utils
 from . import Command, util
 
 
@@ -35,15 +35,43 @@ class InspectPlayer(Command):
 
         _add_parser_path(subparsers)
         _add_parser_stats(subparsers)
+        _add_parser_profs(subparsers)
 
     def exec(self, arg):
         if arg.player_subparser == "path":
             yield from _path(arg)
         elif arg.player_subparser == "stats":
             yield from _stats(arg)
+        elif arg.player_subparser == "profs":
+            yield from _profs(arg)
         else:
             raise ValueError(
                 "Unknown player sub-command '{}'.".format(arg.player_subparser)
+            )
+
+
+def _profs(arg):
+    world_dir = util.get_world_path(arg.dir, arg.world)
+    save, _, _player_name = util.get_save_path(world_dir, arg.player)
+
+    source = json_utils.read_json(save)
+    player = source["player"]
+    profs = player["proficiencies"]
+
+    for prof in profs["known"]:
+        yield prof
+
+    if arg.raw:
+        for prof in profs["learning"]:
+            yield "{:30} {} h".format(prof["id"], round(prof["practiced"] / 3600, 1))
+    else:
+        data = game.read_game_data(arg.dir)
+        all_profs = data["proficiency"]
+
+        for prof in profs["learning"]:
+            total_time = all_profs[prof["id"]]["time_to_learn"]
+            yield "{:30} {} h / {}".format(
+                prof["id"], round(prof["practiced"] / 3600, 1), total_time
             )
 
 
@@ -136,4 +164,21 @@ def _add_parser_stats(subparsers):
         "Example:\n\n"
         "  cdda_tools player -w MyWorld -p MyPlayer stats",
         formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+
+def _add_parser_profs(subparsers):
+    parser_stats = subparsers.add_parser(
+        "profs",
+        help="Show player proficiencies.",
+        description="Show player proficiencies.\n\n"
+        "Example:\n\n"
+        "  cdda_tools player -w MyWorld -p MyPlayer profs",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser_stats.add_argument(
+        "--raw",
+        "-r",
+        action="store_true",
+        help="print raw profs stats (does not require game JSON data)",
     )
