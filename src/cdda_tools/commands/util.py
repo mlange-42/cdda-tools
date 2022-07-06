@@ -88,7 +88,7 @@ def add_dry_run_options(parser):
 def check_is_single_vehicle_source(source_maps, name):
     """
     Checks that only a single element is passed,
-    and exits with vehicle-specific error message otherwise.
+    and exits with vehicle-specific error (ValueError) otherwise.
     """
     if len(source_maps) == 0:
         raise ValueError("Could not find source vehicle '{}'".format(name))
@@ -100,7 +100,7 @@ def check_is_single_vehicle_source(source_maps, name):
 
 
 def check_levels(levels):
-    """Checks that all z levels are in range [-10, 10]. Prints message and exits otherwise."""
+    """Checks that all z levels are in range [-10, 10]. Raises ValueError otherwise."""
     for level in levels:
         if level < -10 or level > 10:
             raise ValueError(
@@ -108,6 +108,12 @@ def check_levels(levels):
                     level,
                 )
             )
+
+
+def check_is_dict(entry, search_str):
+    """Checks if an object it a dice. Raises ValueError otherwise."""
+    if not isinstance(entry, dict):
+        raise ValueError(f"Not a dictionary at data -> {search_str}")
 
 
 def get_world_path(directory: str, world: str) -> str:
