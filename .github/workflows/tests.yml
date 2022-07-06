@@ -21,3 +21,11 @@ jobs:
       - name: Test with pytest
         run: |
           pytest --cov cdda_tools --cov-report term-missing --cov-report xml:coverage.xml -v
+      - name: Make Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        uses: action-badges/cobertura-coverage-xml-badges@0.2.1
+        with:
+          file-name: coverage.svg
+          badge-branch: badges
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+          coverage-file-name: ./coverage.xml
