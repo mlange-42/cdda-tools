@@ -1,3 +1,4 @@
+import json
 import shutil
 import tempfile
 import unittest
@@ -5,7 +6,7 @@ import unittest
 from cdda_tools import cli
 
 
-class TestCopyPlayer(unittest.TestCase):
+class TestVehicleMod(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         shutil.unpack_archive("tests/test_data/save.tar.gz", self.test_dir)
@@ -13,16 +14,21 @@ class TestCopyPlayer(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    def test_copy_player(self):
+    def test_vehicle_mod(self):
         args = cli.parse_args(
             [
                 f"-d={self.test_dir}",
-                "copy-vehicle",
+                "vehicle-mod",
                 "-w=WorldA",
                 "-v=SourceCar",
-                "-w2=WorldB",
-                "-v2=TargetCar",
+                "--id=my_test_vehicle",
             ]
         )
         lines = [line for line in cli.run_cli(args)]
-        self.assertTrue(lines[-1].startswith("Successfully"))
+        self.assertEqual(len(lines), 1)
+
+        obj = json.loads(lines[0])
+        self.assertEqual(obj["id"], "my_test_vehicle")
+        self.assertEqual(obj["type"], "vehicle")
+        self.assertEqual(obj["name"], "SourceCar")
+        self.assertTrue(len(obj["parts"]) > 0)

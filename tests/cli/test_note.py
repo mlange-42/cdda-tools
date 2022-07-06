@@ -5,7 +5,7 @@ import unittest
 from cdda_tools import cli
 
 
-class TestCopyPlayer(unittest.TestCase):
+class TestNote(unittest.TestCase):
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
         shutil.unpack_archive("tests/test_data/save.tar.gz", self.test_dir)
@@ -13,16 +13,21 @@ class TestCopyPlayer(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    def test_copy_player(self):
+    def test_note(self):
         args = cli.parse_args(
             [
                 f"-d={self.test_dir}",
-                "copy-vehicle",
+                "note",
                 "-w=WorldA",
-                "-v=SourceCar",
-                "-w2=WorldB",
-                "-v2=TargetCar",
+                "-p=PlayerA",
+                "0'00",
+                "0'00",
+                "0",
+                "!",
+                "R",
+                "Note text",
             ]
         )
         lines = [line for line in cli.run_cli(args)]
-        self.assertTrue(lines[-1].startswith("Successfully"))
+        self.assertTrue(len(lines) == 1)
+        self.assertEqual(lines[0].split("|")[-1].strip(), "!:R;Note text")

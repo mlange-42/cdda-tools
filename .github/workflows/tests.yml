@@ -20,4 +20,4 @@ jobs:
           pip install pytest
       - name: Test with pytest
         run: |
-          pytest -v
+          pytest --cov cdda_tools --cov-report term-missing --cov-report xml:coverage.xml -v
