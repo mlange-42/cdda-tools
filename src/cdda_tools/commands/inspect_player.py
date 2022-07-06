@@ -36,6 +36,7 @@ class InspectPlayer(Command):
         _add_parser_path(subparsers)
         _add_parser_stats(subparsers)
         _add_parser_profs(subparsers)
+        _add_parser_body(subparsers)
 
     def exec(self, arg):
         if arg.player_subparser == "path":
@@ -44,6 +45,8 @@ class InspectPlayer(Command):
             yield from _stats(arg)
         elif arg.player_subparser == "profs":
             yield from _profs(arg)
+        elif arg.player_subparser == "body":
+            yield from _body(arg)
         else:
             raise ValueError(
                 "Unknown player sub-command '{}'.".format(arg.player_subparser)
@@ -86,6 +89,22 @@ def _stats(arg):
     yield "Dex {:2}/{:2}".format(player["dex_cur"], player["dex_max"])
     yield "Int {:2}/{:2}".format(player["int_cur"], player["int_max"])
     yield "Per {:2}/{:2}".format(player["per_cur"], player["per_max"])
+
+
+def _body(arg):
+    world_dir = util.get_world_path(arg.dir, arg.world)
+    save, _, _player_name = util.get_save_path(world_dir, arg.player)
+
+    source = json_utils.read_json(save)
+    player = source["player"]
+    body = player["body"]
+
+    yield "        |   HP | Temp |  Wet |"
+    for part, stats in body.items():
+        temp = int((stats["temp_conv"] - 5000) * 0.02)
+        hit_pt = int((100 * stats["hp_cur"]) / stats["hp_max"])
+        wet = stats["wetness"]
+        yield "{:7} | {:3}% | {:4} | {:4} |".format(part, hit_pt, temp, wet)
 
 
 def _path(arg):
@@ -181,4 +200,15 @@ def _add_parser_profs(subparsers):
         "-r",
         action="store_true",
         help="print raw profs stats (does not require game JSON data)",
+    )
+
+
+def _add_parser_body(subparsers):
+    _parser_body = subparsers.add_parser(
+        "body",
+        help="Show player body parts.",
+        description="Show player body parts.\n\n"
+        "Example:\n\n"
+        "  cdda_tools player -w MyWorld -p MyPlayer body",
+        formatter_class=argparse.RawTextHelpFormatter,
     )
