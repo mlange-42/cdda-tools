@@ -87,14 +87,7 @@ def find_terrain(arg):
     util.check_levels(arg.z_levels)
 
     world_dir = util.get_world_path(arg.dir, arg.world)
-    _, save_name, player = util.get_save_path(world_dir, arg.player)
-
-    print(
-        "Searching for terrain in {} ({})".format(
-            player,
-            world_dir,
-        )
-    )
+    _, save_name, _ = util.get_save_path(world_dir, arg.player)
 
     seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
     seen_coords = [list(map(int, f.split(".")[-2:])) for f in seen_files]
