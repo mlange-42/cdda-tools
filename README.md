@@ -1,6 +1,7 @@
 # CDDA-Tools
 
 [![Tests](https://github.com/mlange-42/cdda-tools/actions/workflows/tests.yml/badge.svg)](https://github.com/mlange-42/cdda-tools/actions/workflows/tests.yml)
+[![Lints](https://github.com/mlange-42/cdda-tools/actions/workflows/lints.yml/badge.svg)](https://github.com/mlange-42/cdda-tools/actions/workflows/lints.yml)
 
 Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 
