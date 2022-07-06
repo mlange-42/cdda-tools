@@ -1,6 +1,7 @@
 """Inspect the player"""
 import argparse
 import json
+import math
 
 from .. import game, json_utils
 from . import Command, util
@@ -35,6 +36,7 @@ class InspectPlayer(Command):
 
         _add_parser_path(subparsers)
         _add_parser_stats(subparsers)
+        _add_parser_skills(subparsers)
         _add_parser_profs(subparsers)
         _add_parser_body(subparsers)
 
@@ -43,6 +45,8 @@ class InspectPlayer(Command):
             yield from _path(arg)
         elif arg.player_subparser == "stats":
             yield from _stats(arg)
+        elif arg.player_subparser == "skills":
+            yield from _skills(arg)
         elif arg.player_subparser == "profs":
             yield from _profs(arg)
         elif arg.player_subparser == "body":
@@ -89,6 +93,25 @@ def _stats(arg):
     yield "Dex {:2}/{:2}".format(player["dex_cur"], player["dex_max"])
     yield "Int {:2}/{:2}".format(player["int_cur"], player["int_max"])
     yield "Per {:2}/{:2}".format(player["per_cur"], player["per_max"])
+
+
+def _skills(arg):
+    world_dir = util.get_world_path(arg.dir, arg.world)
+    save, _, _player_name = util.get_save_path(world_dir, arg.player)
+
+    source = json_utils.read_json(save)
+    player = source["player"]
+    skills = player["skills"]
+
+    for skill, stats in skills.items():
+        rel_exp = int((100 * stats["exercise"]) / _required_exercise(stats["level"]))
+        rel_exp_know = int(
+            (100 * stats["knowledgeExperience"])
+            / _required_exercise(stats["knowledgeLevel"])
+        )
+        yield "{:15} {:2} {:2}% | {:2} {:2}%".format(
+            skill, stats["level"], rel_exp, stats["knowledgeLevel"], rel_exp_know
+        )
 
 
 def _body(arg):
@@ -143,6 +166,10 @@ def _path(arg):
             yield text
 
 
+def _required_exercise(level):
+    return 10000 * math.pow(level + 1, 2)
+
+
 def _add_parser_path(subparsers):
     parser_path = subparsers.add_parser(
         "path",
@@ -182,6 +209,17 @@ def _add_parser_stats(subparsers):
         description="Show player stats.\n\n"
         "Example:\n\n"
         "  cdda_tools player -w MyWorld -p MyPlayer stats",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+
+
+def _add_parser_skills(subparsers):
+    _parser_stats = subparsers.add_parser(
+        "skills",
+        help="Show player skills.",
+        description="Show player skills.\n\n"
+        "Example:\n\n"
+        "  cdda_tools player -w MyWorld -p MyPlayer skills",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
