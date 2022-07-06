@@ -8,9 +8,14 @@ DATA_DIR = "data"
 JSON_DIR = "json"
 
 
-def read_game_data(game_dir):
+def read_game_data(game_dir, types=None):
     """Read all CDDA json into a large nested dictionary"""
+    # pylint: disable=too-many-branches
+
     json_glob = path.join(game_dir, DATA_DIR, JSON_DIR, "**", "*.json")
+
+    if types is not None:
+        types = set(types)
 
     data = {}
 
@@ -18,6 +23,8 @@ def read_game_data(game_dir):
         json_data = json_utils.read_json(file)
         for entry in json_data:
             entry_type = entry["type"]
+            if types is not None and entry_type not in types:
+                continue
             if "id" in entry:
                 entry_ids = entry["id"]
                 if not isinstance(entry_ids, list):
