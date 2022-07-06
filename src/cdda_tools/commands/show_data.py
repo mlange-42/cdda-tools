@@ -6,7 +6,7 @@ from fnmatch import translate
 import regex
 
 from .. import game
-from . import Command
+from . import Command, util
 
 
 class ShowData(Command):
@@ -137,7 +137,7 @@ def _hierarchical(arg):
 
     if arg.values is not None:
         for key in arg.values:
-            _check_is_dict(extract, search_str)
+            util.check_is_dict(extract, search_str)
 
             if key in extract:
                 extract = extract[key]
@@ -146,7 +146,7 @@ def _hierarchical(arg):
             search_str += f" --> {key}"
 
     if arg.keys:
-        _check_is_dict(extract, search_str)
+        util.check_is_dict(extract, search_str)
 
         keys = list(extract.keys())
         keys.sort()
@@ -177,7 +177,7 @@ def _search(arg):
                         yield f"{key:50} ({cat})"
                     elif arg.keys:
                         yield f"----- Category {cat}: {key} -----"
-                        _check_is_dict(entry, f"{cat} --> {key}")
+                        util.check_is_dict(entry, f"{cat} --> {key}")
 
                         keys = list(entry.keys())
                         keys.sort()
@@ -242,7 +242,7 @@ def _pairs(arg):
                 yield f"{key:50} ({cat})"
             elif arg.keys:
                 yield f"----- Category {cat}: {key} -----"
-                _check_is_dict(entry, f"{cat} --> {key}")
+                util.check_is_dict(entry, f"{cat} --> {key}")
 
                 keys = list(entry.keys())
                 keys.sort()
@@ -253,8 +253,3 @@ def _pairs(arg):
 
     if not any_found:
         yield f"No data found for pairs {arg.values}"
-
-
-def _check_is_dict(entry, search_str):
-    if not isinstance(entry, dict):
-        raise ValueError(f"Not a dictionary at data -> {search_str}")
