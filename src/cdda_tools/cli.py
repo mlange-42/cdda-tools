@@ -20,18 +20,21 @@ COMMANDS = {
 def run_cli(args):
     """Run the CLI with parsed arguments (see parse_args(args))"""
     if args.subparser not in COMMANDS:
-        raise ValueError("Unknown sub-command '{}'.".format(args.subparser))
+        raise ValueError(
+            "Unknown sub-command '{}'. Try:\n"
+            "  cdda_tools --help".format(args.subparser)
+        )
 
     COMMANDS[args.subparser].exec(args)
 
 
-def parse_args(args=None):
+def parse_args(args=None) -> argparse.Namespace:
     """Parse arguments array"""
     parser = _create_parser()
     return parser.parse_args(args)
 
 
-def _create_parser():
+def _create_parser() -> argparse.ArgumentParser:
     """Create the main argument parser"""
     parser = argparse.ArgumentParser(
         description="Cataclysm DDA Python tools.",

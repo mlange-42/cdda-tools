@@ -82,7 +82,8 @@ class Notes(Command):
             )
         else:
             raise ValueError(
-                "Unknown notes sub-command '{}'.".format(arg.notes_subparser)
+                "Unknown notes sub-command '{}'. Try:\n"
+                "  cdda_tools notes --help".format(arg.notes_subparser)
             )
 
 
