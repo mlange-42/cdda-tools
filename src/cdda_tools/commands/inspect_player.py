@@ -34,14 +34,30 @@ class InspectPlayer(Command):
         )
 
         _add_parser_path(subparsers)
+        _add_parser_stats(subparsers)
 
     def exec(self, arg):
         if arg.player_subparser == "path":
             yield from _path(arg)
+        elif arg.player_subparser == "stats":
+            yield from _stats(arg)
         else:
             raise ValueError(
                 "Unknown player sub-command '{}'.".format(arg.player_subparser)
             )
+
+
+def _stats(arg):
+    world_dir = util.get_world_path(arg.dir, arg.world)
+    save, _, _player_name = util.get_save_path(world_dir, arg.player)
+
+    source = json_utils.read_json(save)
+    player = source["player"]
+
+    yield "Str {:2}/{:2}".format(player["str_cur"], player["str_max"])
+    yield "Dex {:2}/{:2}".format(player["dex_cur"], player["dex_max"])
+    yield "Int {:2}/{:2}".format(player["int_cur"], player["int_max"])
+    yield "Per {:2}/{:2}".format(player["per_cur"], player["per_max"])
 
 
 def _path(arg):
@@ -86,8 +102,8 @@ def _add_parser_path(subparsers):
         help="Show data by JSON path.",
         description="Show data by JSON path.\n\n"
         "Examples:\n\n"
-        "  cdda_tools player path dex_cur\n"
-        "  cdda_tools player path body torso hp_cur",
+        "  cdda_tools player -w MyWorld -p MyPlayer path dex_cur\n"
+        "  cdda_tools player -w MyWorld -p MyPlayer path body torso hp_cur",
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
@@ -109,4 +125,15 @@ def _add_parser_path(subparsers):
         "-l",
         action="store_true",
         help="print keys in front of the data",
+    )
+
+
+def _add_parser_stats(subparsers):
+    _parser_stats = subparsers.add_parser(
+        "stats",
+        help="Show player stats.",
+        description="Show player stats.\n\n"
+        "Example:\n\n"
+        "  cdda_tools player -w MyWorld -p MyPlayer stats",
+        formatter_class=argparse.RawTextHelpFormatter,
     )
