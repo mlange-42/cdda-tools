@@ -30,6 +30,21 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.assertEqual(lines[0], "90")
 
+    def test_path_keys(self):
+        args = cli.parse_args(
+            [
+                f"-d={self.test_dir}",
+                "player",
+                "-w=WorldA",
+                "-p=PlayerA",
+                "path",
+                "body",
+                "--key",
+            ]
+        )
+        lines = [line for line in cli.run_cli(args)]
+        self.assertEqual(len(lines), 1)
+
     def test_stats(self):
         args = cli.parse_args(
             [

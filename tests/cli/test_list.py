@@ -26,3 +26,16 @@ class TestList(unittest.TestCase):
             ]
         )
         _lines = [line for line in cli.run_cli(args)]
+
+    def test_list_fail(self):
+        with self.assertRaises(SystemExit):
+            _args = cli.parse_args(
+                [
+                    f"-d={self.test_dir}",
+                    "list",
+                    "-w=WorldA",
+                    "0'00",
+                    "--z-level",
+                    "0",
+                ]
+            )

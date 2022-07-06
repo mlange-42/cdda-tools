@@ -31,7 +31,8 @@ class InspectPlayer(Command):
 
         subparsers = parser.add_subparsers(
             help="Player sub-commands",
-            dest="player_subparser",
+            dest="player_subcommand",
+            required=True,
         )
 
         _add_parser_path(subparsers)
@@ -41,15 +42,15 @@ class InspectPlayer(Command):
         _add_parser_body(subparsers)
 
     def exec(self, arg):
-        if arg.player_subparser == "path":
+        if arg.player_subcommand == "path":
             yield from _path(arg)
-        elif arg.player_subparser == "stats":
+        elif arg.player_subcommand == "stats":
             yield from _stats(arg)
-        elif arg.player_subparser == "skills":
+        elif arg.player_subcommand == "skills":
             yield from _skills(arg)
-        elif arg.player_subparser == "profs":
+        elif arg.player_subcommand == "profs":
             yield from _profs(arg)
-        elif arg.player_subparser == "body":
+        elif arg.player_subcommand == "body":
             yield from _body(arg)
         else:
             raise ValueError(

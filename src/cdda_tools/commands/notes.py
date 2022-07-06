@@ -36,7 +36,8 @@ class Notes(Command):
 
         subparsers = parser.add_subparsers(
             help="Notes sub-commands",
-            dest="notes_subparser",
+            dest="notes_subcommand",
+            required=True,
         )
         _add_parser_list(subparsers)
         _add_parser_delete(subparsers)
@@ -50,19 +51,19 @@ class Notes(Command):
 
         seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
 
-        if arg.notes_subparser == "list":
+        if arg.notes_subcommand == "list":
             yield from list_notes(
                 seen_files, arg.patterns, arg.ignore, arg.danger, arg.case
             )
-        elif arg.notes_subparser == "delete":
+        elif arg.notes_subcommand == "delete":
             yield from delete_notes(
                 seen_files, arg.patterns, arg.ignore, arg.case, arg.dry
             )
-        elif arg.notes_subparser == "danger":
+        elif arg.notes_subcommand == "danger":
             yield from mark_notes_danger(
                 seen_files, arg.patterns, arg.ignore, arg.radius, arg.case, arg.dry
             )
-        elif arg.notes_subparser == "edit":
+        elif arg.notes_subcommand == "edit":
             yield from edit_notes(
                 seen_files,
                 arg.patterns,
@@ -73,7 +74,7 @@ class Notes(Command):
                 arg.case,
                 arg.dry,
             )
-        elif arg.notes_subparser == "replace":
+        elif arg.notes_subcommand == "replace":
             yield from replace_in_notes(
                 seen_files, arg.patterns, arg.ignore, arg.replace, arg.case, arg.dry
             )

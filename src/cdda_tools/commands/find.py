@@ -34,13 +34,14 @@ class Find(Command):
 
         subparsers = parser.add_subparsers(
             help="Find sub-commands",
-            dest="find_subparser",
+            dest="find_subcommand",
+            required=True,
         )
 
         _add_parser_terrain(subparsers)
 
     def exec(self, arg):
-        if arg.find_subparser == "terrain":
+        if arg.find_subcommand == "terrain":
             yield from find_terrain(arg)
         else:
             raise ValueError(
