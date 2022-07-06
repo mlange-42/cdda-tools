@@ -65,7 +65,7 @@ def _profs(arg):
         for prof in profs["learning"]:
             yield "{:30} {} h".format(prof["id"], round(prof["practiced"] / 3600, 1))
     else:
-        data = game.read_game_data(arg.dir)
+        data = game.read_game_data(arg.dir, ["proficiency"])
         all_profs = data["proficiency"]
 
         for prof in profs["learning"]:
