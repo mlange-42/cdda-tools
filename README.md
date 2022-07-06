@@ -19,6 +19,7 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
    * Full-text search & replace
 * `note`: Add Overmap notes by coordinates
 * `find`: Find Overmap terrain types (maybe later also monsters and items)
+* `player`: Inspect player properties, stats, skills, body parts, ...
 
 The tools are built against the experimental version of Cataclysm DDA,
 so it may or may not work with stable releases.
@@ -81,6 +82,20 @@ cdda_tools notes -w World1 -p MyPlayer danger *[Mm]oose* --case --radius 2
 ```
 
 > Note: try `cdda_tools notes -h` to explore features like editing and deleting notes.
+
+### Inspect the player
+
+Show player skills:
+
+```shell
+cdda_tools player -w World1 -p MyPlayer skills
+```
+
+Show player properties by JSON path:
+
+```shell
+cdda_tools player -w World1 -p MyPlayer path body torso hp_cur
+```
 
 ### Browse the game's JSON data
 
