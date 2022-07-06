@@ -22,7 +22,8 @@ class ShowData(Command):
 
         subparsers = parser.add_subparsers(
             help="Show data sub-commands",
-            dest="show_subparser",
+            dest="show_subcommand",
+            required=True,
         )
 
         _add_parser_path(subparsers)
@@ -30,11 +31,11 @@ class ShowData(Command):
         _add_parser_pairs(subparsers)
 
     def exec(self, arg):
-        if arg.show_subparser == "path":
+        if arg.show_subcommand == "path":
             yield from _hierarchical(arg)
-        elif arg.show_subparser == "ids":
+        elif arg.show_subcommand == "ids":
             yield from _search(arg)
-        elif arg.show_subparser == "pairs":
+        elif arg.show_subcommand == "pairs":
             yield from _pairs(arg)
         else:
             raise ValueError(

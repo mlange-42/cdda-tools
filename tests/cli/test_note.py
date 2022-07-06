@@ -31,3 +31,19 @@ class TestNote(unittest.TestCase):
         lines = [line for line in cli.run_cli(args)]
         self.assertTrue(len(lines) == 1)
         self.assertEqual(lines[0].split("|")[-1].strip(), "!:R;Note text")
+
+    def test_note_fail(self):
+        with self.assertRaises(SystemExit) as cm:
+            _args = cli.parse_args(
+                [
+                    f"-d={self.test_dir}",
+                    "note",
+                    "-w=WorldA",
+                    "-p=PlayerA",
+                    "-w=WorldA",
+                    "-p=PlayerA",
+                    "0'00",
+                    "0'00",
+                    "0",
+                ]
+            )
