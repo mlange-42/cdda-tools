@@ -62,7 +62,7 @@ class TestNotes(unittest.TestCase):
                 "danger",
                 "*Unique*",
                 "--radius",
-                "5"
+                "5",
             ]
         )
         lines = [line for line in cli.run_cli(args)]
@@ -85,7 +85,7 @@ class TestNotes(unittest.TestCase):
                 "-w=WorldA",
                 "-p=PlayerA",
                 "delete",
-                "*Unique*"
+                "*Unique*",
             ]
         )
         lines = [line for line in cli.run_cli(args)]
@@ -106,19 +106,26 @@ class TestNotes(unittest.TestCase):
                 "-p=PlayerA",
                 "edit",
                 "*Unique*",
-                "-s", "?",
-                "-c", "y",
-                "-t", "Changed unique note text",
+                "-s",
+                "?",
+                "-c",
+                "y",
+                "-t",
+                "Changed unique note text",
             ]
         )
         lines = [line for line in cli.run_cli(args)]
         self.assertEqual(len(lines), 3)
         self.assertEqual(lines[0].split("|")[-1].strip(), "!:R;Unique note text")
-        self.assertEqual(lines[1].split("|")[-1].strip(), "?:y;Changed unique note text")
+        self.assertEqual(
+            lines[1].split("|")[-1].strip(), "?:y;Changed unique note text"
+        )
 
         lines = [line for line in self.list_notes("*Changed unique*")]
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0].split("|")[-1].strip(), "?:y;Changed unique note text")
+        self.assertEqual(
+            lines[0].split("|")[-1].strip(), "?:y;Changed unique note text"
+        )
 
     def test_notes_replace(self):
         self.add_note("!", "R", "Unique note text")
@@ -131,7 +138,9 @@ class TestNotes(unittest.TestCase):
                 "-p=PlayerA",
                 "replace",
                 "*Unique*",
-                "-r", "text", "TEXT",
+                "-r",
+                "text",
+                "TEXT",
             ]
         )
         lines = [line for line in cli.run_cli(args)]
