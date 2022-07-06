@@ -46,27 +46,24 @@ class Notes(Command):
 
     def exec(self, arg):
         world_dir = util.get_world_path(arg.dir, arg.world)
-        _, save_name, player = util.get_save_path(world_dir, arg.player)
-
-        print(
-            "Processing notes for {} ({})".format(
-                player,
-                world_dir,
-            )
-        )
+        _, save_name, _ = util.get_save_path(world_dir, arg.player)
 
         seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
 
         if arg.notes_subparser == "list":
-            list_notes(seen_files, arg.patterns, arg.ignore, arg.danger, arg.case)
+            yield from list_notes(
+                seen_files, arg.patterns, arg.ignore, arg.danger, arg.case
+            )
         elif arg.notes_subparser == "delete":
-            delete_notes(seen_files, arg.patterns, arg.ignore, arg.case, arg.dry)
+            yield from delete_notes(
+                seen_files, arg.patterns, arg.ignore, arg.case, arg.dry
+            )
         elif arg.notes_subparser == "danger":
-            mark_notes_danger(
+            yield from mark_notes_danger(
                 seen_files, arg.patterns, arg.ignore, arg.radius, arg.case, arg.dry
             )
         elif arg.notes_subparser == "edit":
-            edit_notes(
+            yield from edit_notes(
                 seen_files,
                 arg.patterns,
                 arg.ignore,
@@ -77,7 +74,7 @@ class Notes(Command):
                 arg.dry,
             )
         elif arg.notes_subparser == "replace":
-            replace_in_notes(
+            yield from replace_in_notes(
                 seen_files, arg.patterns, arg.ignore, arg.replace, arg.case, arg.dry
             )
         else:
@@ -107,6 +104,7 @@ def _compile_regex(pat, case_sensitive):
 
 # pylint: disable=too-many-arguments
 def _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, func):
+    # pylint: disable=too-many-locals
     rex = [_compile_regex(p, case_sensitive) for p in patterns]
     rex_ign = [_compile_regex(p, case_sensitive) for p in ignore or []]
     for file in seen_files:
@@ -118,7 +116,9 @@ def _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, func):
                 if matches(note[2], rex, case_sensitive) and not matches(
                     note[2], rex_ign, case_sensitive
                 ):
-                    file_changed = func(note)
+                    lines, file_changed = func(note)
+                    for line in lines:
+                        yield line
         if file_changed and not dry:
             json.write_json(content, file)
 
@@ -127,11 +127,12 @@ def list_notes(seen_files, patterns, ignore, danger, case_sensitive):
     """List notes by pattern"""
 
     def handle(note):
+        lines = []
         if not danger or note[3]:
-            print(util.note_to_str(note))
-        return False
+            lines.append(util.note_to_str(note))
+        return lines, False
 
-    _handle_notes(seen_files, patterns, ignore, case_sensitive, True, handle)
+    yield from _handle_notes(seen_files, patterns, ignore, case_sensitive, True, handle)
 
 
 # pylint: disable=too-many-arguments
@@ -150,13 +151,13 @@ def edit_notes(seen_files, patterns, ignore, symbol, color, text, case_sensitive
         raise ValueError("Color argument must be a string of 1 or 2 characters!")
 
     def handle(note):
-        print(util.note_to_str(note))
+        lines = [util.note_to_str(note)]
         note[2] = _edit_note(note[2], symbol, color, text)
-        print(util.note_to_str(note))
-        print("-----------------------------------------")
-        return True
+        lines.append(util.note_to_str(note))
+        lines.append("-----------------------------------------")
+        return lines, True
 
-    _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
+    yield from _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
 
 
 def _edit_note(note: str, symbol, color, text):
@@ -223,13 +224,13 @@ def replace_in_notes(seen_files, patterns, ignore, replace, case_sensitive, dry)
         )
 
     def handle(note):
-        print(util.note_to_str(note))
+        lines = [util.note_to_str(note)]
         note[2] = _replace_in_note(note[2], replace)
-        print(util.note_to_str(note))
-        print("-----------------------------------------")
-        return True
+        lines.append(util.note_to_str(note))
+        lines.append("-----------------------------------------")
+        return lines, True
 
-    _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
+    yield from _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
 
 
 def format_note_tuple(tup, note):
@@ -250,10 +251,9 @@ def mark_notes_danger(seen_files, patterns, ignore, radius, case_sensitive, dry)
         else:
             note[3] = True
             note[4] = radius
-        print(util.note_to_str(note))
-        return True
+        return [util.note_to_str(note)], True
 
-    _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
+    yield from _handle_notes(seen_files, patterns, ignore, case_sensitive, dry, handle)
 
 
 def delete_notes(seen_files, patterns, ignore, case_sensitive, dry):
@@ -269,7 +269,7 @@ def delete_notes(seen_files, patterns, ignore, case_sensitive, dry):
                 if matches(note[2], rex, case_sensitive) and not matches(
                     note[2], rex_ign, case_sensitive
                 ):
-                    print(util.note_to_str(note))
+                    yield util.note_to_str(note)
             old_size = len(notes[i])
             notes[i] = list(
                 filter(

@@ -72,7 +72,7 @@ class VehicleMod(Command):
             raise ValueError("Could not find vehicle '{}'".format(arg.vehicle))
 
         mod_json = vehicle_to_mod(source_vehicle, arg.id, arg.no_items)
-        print(json.dumps(mod_json, indent=4))
+        yield json.dumps(mod_json, indent=4)
 
 
 def vehicle_to_mod(vehicle, vehicle_id, no_items):

@@ -25,4 +25,5 @@ class TestCopyPlayer(unittest.TestCase):
                 "-p2=PlayerB",
             ]
         )
-        cli.run_cli(args)
+        lines = [line for line in cli.run_cli(args)]
+        self.assertTrue(lines[-1].startswith("Successfully"))

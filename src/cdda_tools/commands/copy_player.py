@@ -111,26 +111,29 @@ class CopyPlayer(Command):
         world_dir_2 = util.get_world_path(arg.dir, arg.world2)
         save_2, _, player_2 = util.get_save_path(world_dir_2, arg.player2)
 
-        print(
-            "Copying player {} ({}) -> {} ({})".format(
-                player_1, world_dir_1, player_2, world_dir_2
-            )
+        yield "Copying player {} ({}) -> {} ({})".format(
+            player_1, world_dir_1, player_2, world_dir_2
         )
 
         source = json.read_json(save_1)
         target = json.read_json(save_2)
 
         for prop in PROPERTIES:
-            if prop in target["player"]:
+            if prop in source["player"]:
                 target["player"][prop] = source["player"][prop]
-            elif prop in source["player"]:
-                del source["player"]
+            elif prop in target["player"]:
+                del target["player"]
+                yield (
+                    "Warning: missing property '{}' in source player! "
+                    "Removing it from target player."
+                ).format(prop)
 
-        if not arg.dry:
+        if arg.dry:
+            yield "Skip writing back to player file (--dry)"
+        else:
+            yield "Writing back to player file"
             json.write_json(target, save_2)
 
-        print(
-            "Successfully copied player {} ({}) -> {} ({})".format(
-                player_1, world_dir_1, player_2, world_dir_2
-            )
+        yield "Successfully copied player {} ({}) -> {} ({})".format(
+            player_1, world_dir_1, player_2, world_dir_2
         )

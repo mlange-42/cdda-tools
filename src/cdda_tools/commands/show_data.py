@@ -31,11 +31,11 @@ class ShowData(Command):
 
     def exec(self, arg):
         if arg.show_subparser == "path":
-            _hierarchical(arg)
+            yield from _hierarchical(arg)
         elif arg.show_subparser == "ids":
-            _search(arg)
+            yield from _search(arg)
         elif arg.show_subparser == "pairs":
-            _pairs(arg)
+            yield from _pairs(arg)
         else:
             raise ValueError(
                 "Unknown show-data sub-command '{}'.".format(arg.show_subparser)
@@ -150,9 +150,9 @@ def _hierarchical(arg):
 
         keys = list(extract.keys())
         keys.sort()
-        print(keys)
+        yield keys
     else:
-        print(json.dumps(extract, indent=4))
+        yield json.dumps(extract, indent=4)
 
 
 def _search(arg):
@@ -174,19 +174,19 @@ def _search(arg):
                 if match:
                     any_found = True
                     if arg.list:
-                        print(f"{key:50} ({cat})")
+                        yield f"{key:50} ({cat})"
                     elif arg.keys:
-                        print(f"----- Category {cat}: {key} -----")
+                        yield f"----- Category {cat}: {key} -----"
                         _check_is_dict(entry, f"{cat} --> {key}")
 
                         keys = list(entry.keys())
                         keys.sort()
-                        print(keys)
+                        yield keys
                     else:
-                        print(f"----- Category {cat}: {key} -----")
-                        print(json.dumps(entry, indent=4))
+                        yield f"----- Category {cat}: {key} -----"
+                        yield json.dumps(entry, indent=4)
     if not any_found:
-        print(f"No data found for globs {arg.values}")
+        yield f"No data found for globs {arg.values}"
 
 
 def _pairs(arg):
@@ -239,20 +239,20 @@ def _pairs(arg):
             any_found = True
 
             if arg.list:
-                print(f"{key:50} ({cat})")
+                yield f"{key:50} ({cat})"
             elif arg.keys:
-                print(f"----- Category {cat}: {key} -----")
+                yield f"----- Category {cat}: {key} -----"
                 _check_is_dict(entry, f"{cat} --> {key}")
 
                 keys = list(entry.keys())
                 keys.sort()
-                print(keys)
+                yield keys
             else:
-                print(f"----- Category {cat}: {key} -----")
-                print(json.dumps(entry, indent=4))
+                yield f"----- Category {cat}: {key} -----"
+                yield json.dumps(entry, indent=4)
 
     if not any_found:
-        print(f"No data found for pairs {arg.values}")
+        yield f"No data found for pairs {arg.values}"
 
 
 def _check_is_dict(entry, search_str):

@@ -41,7 +41,7 @@ class Find(Command):
 
     def exec(self, arg):
         if arg.find_subparser == "terrain":
-            find_terrain(arg)
+            yield from find_terrain(arg)
         else:
             raise ValueError(
                 "Unknown find sub-command '{}'.".format(arg.find_subparser)
@@ -87,14 +87,7 @@ def find_terrain(arg):
     util.check_levels(arg.z_levels)
 
     world_dir = util.get_world_path(arg.dir, arg.world)
-    _, save_name, player = util.get_save_path(world_dir, arg.player)
-
-    print(
-        "Searching for terrain in {} ({})".format(
-            player,
-            world_dir,
-        )
-    )
+    _, save_name, _ = util.get_save_path(world_dir, arg.player)
 
     seen_files = glob.glob(path.join(world_dir, "{}.seen.*.*".format(save_name)))
     seen_coords = [list(map(int, f.split(".")[-2:])) for f in seen_files]
@@ -123,9 +116,8 @@ def find_terrain(arg):
                         index = pos + i
                         if arg.unseen or _is_seen(seen_layer, index):
                             x_sub, y_sub = util.index_to_xy_overmap(index)
-                            print(
-                                "{}'{}, {}'{}, {}: {}".format(
-                                    coord[0], x_sub, coord[1], y_sub, level, rle[0]
-                                )
+                            yield "{}'{}, {}'{}, {}: {}".format(
+                                coord[0], x_sub, coord[1], y_sub, level, rle[0]
                             )
+
                 pos += rle[1]

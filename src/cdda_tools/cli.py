@@ -25,7 +25,7 @@ def run_cli(args):
             "  cdda_tools --help".format(args.subparser)
         )
 
-    COMMANDS[args.subparser].exec(args)
+    yield from COMMANDS[args.subparser].exec(args)
 
 
 def parse_args(args=None) -> argparse.Namespace:

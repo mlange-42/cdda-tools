@@ -47,20 +47,27 @@ class CopyVehicle(Command):
         world_dir_1 = util.get_world_path(arg.dir, arg.world)
         world_dir_2 = util.get_world_path(arg.dir, arg.world2)
 
+        yield "Copying vehicle {} ({}) -> {} ({})".format(
+            arg.vehicle, world_dir_1, arg.vehicle2, world_dir_2
+        )
+
+        yield "Searching for map tile of source vehicle {} ({})".format(
+            arg.vehicle, world_dir_1
+        )
+
         source_path = path.join(world_dir_1, util.MAPS_DIR)
         source_maps = util.find_files_with_text(source_path, arg.vehicle)
+        util.check_is_single_vehicle_source(source_maps, arg.vehicle)
+
+        yield "Searching for map tile of target vehicle {} ({})".format(
+            arg.vehicle2, world_dir_2
+        )
 
         target_path = path.join(world_dir_2, util.MAPS_DIR)
         target_maps = util.find_files_with_text(target_path, arg.vehicle2)
-
-        util.check_is_single_vehicle_source(source_maps, arg.vehicle)
         util.check_is_single_vehicle_source(target_maps, arg.vehicle2)
 
-        print(
-            "Copying vehicle {} ({}) -> {} ({})".format(
-                arg.vehicle, world_dir_1, arg.vehicle2, world_dir_2
-            )
-        )
+        yield "Extracting vehicles"
 
         sources = json.read_json(source_maps[0])
         targets = json.read_json(target_maps[0])
@@ -73,15 +80,18 @@ class CopyVehicle(Command):
         if target_vehicle is None:
             raise ValueError("Could not find target vehicle '{}'".format(arg.vehicle2))
 
+        yield "Copying vehicle"
+
         target_vehicle["parts"] = source_vehicle["parts"]
 
-        if not arg.dry:
+        if arg.dry:
+            yield "Skip writing back to file {} (--dry)".format(target_maps[0])
+        else:
+            yield "Writing back to file {}".format(target_maps[0])
             json.write_json(targets, target_maps[0])
 
-        print(
-            "Successfully copied vehicle {} ({}) -> {} ({})".format(
-                arg.vehicle, world_dir_1, arg.vehicle2, world_dir_2
-            )
+        yield "Successfully copied vehicle {} ({}) -> {} ({})".format(
+            arg.vehicle, world_dir_1, arg.vehicle2, world_dir_2
         )
 
 

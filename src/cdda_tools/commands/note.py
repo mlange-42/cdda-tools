@@ -100,7 +100,7 @@ class Note(Command):
             arg.radius is not None,
             arg.radius or 0,
         ]
-        print(util.note_to_str(new_note))
+        yield util.note_to_str(new_note)
         notes[arg.z + 10].append(new_note)
 
         if not arg.dry:
