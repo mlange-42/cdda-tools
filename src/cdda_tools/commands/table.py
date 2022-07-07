@@ -45,7 +45,7 @@ class Table(Command):
             "--format",
             "-f",
             type=str,
-            help="output format if other than print for direct viewing. one of [md html]",
+            help="output format if other than print for direct viewing. one of [md html csv]",
         )
 
     def exec(self, arg):
@@ -117,10 +117,12 @@ class Table(Command):
             yield from _print_table_html(table_data, columns, width)
         elif arg.format == "md":
             yield from _print_table_markdown(table_data, columns, width)
+        elif arg.format == "csv":
+            yield from _print_table_csv(table_data, columns, width)
         else:
             raise ValueError(
                 f"Unrecognized argument '{arg.format}' for option --format. "
-                f"Must be one of [html md]."
+                f"Must be one of [html md csv]."
             )
 
 
@@ -168,3 +170,9 @@ def _print_table_html(table_data, columns, widths):
             ["{val}".format(val=entry[col]) for col in columns]
         ) + "</td>\n</tr>"
     yield "</table>"
+
+
+def _print_table_csv(table_data, columns, _widths):
+    yield ";".join(columns)
+    for entry in table_data:
+        yield ";".join(["{}".format(entry[col]) for col in columns])
