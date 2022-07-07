@@ -20,6 +20,8 @@ class ShowData(Command):
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
+        util.add_no_inheritance_options(parser)
+
         subparsers = parser.add_subparsers(
             help="Show data sub-commands",
             dest="show_subcommand",
@@ -132,7 +134,7 @@ def _add_parser_pairs(subparsers):
 
 
 def _hierarchical(arg):
-    data = game.read_game_data(arg.dir)
+    data = game.read_game_data(arg.dir, copy=not arg.no_inherit)
     extract = data
     search_str = "data"
 
@@ -160,7 +162,7 @@ def _search(arg):
     if arg.list and arg.keys:
         raise ValueError("Options --list and --keys are mutually exclusive.")
 
-    data = game.read_game_data(arg.dir)
+    data = game.read_game_data(arg.dir, copy=not arg.no_inherit)
 
     rex = [regex.compile(translate(pat)) for pat in arg.values]
     any_found = False
@@ -202,7 +204,7 @@ def _pairs(arg):
             "Option 'values' requires an even number of arguments (key/value pairs)."
         )
 
-    data = game.read_game_data(arg.dir)
+    data = game.read_game_data(arg.dir, copy=not arg.no_inherit)
 
     conditions = [
         (arg.values[i], regex.compile(translate(arg.values[i + 1])))

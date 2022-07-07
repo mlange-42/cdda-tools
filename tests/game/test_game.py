@@ -9,6 +9,11 @@ class TestJson(unittest.TestCase):
         self.assertTrue(isinstance(data, dict))
         self.assertTrue(len(data) > 0)
 
+    def test_read_game_data_inherit(self):
+        data = cdda_tools.game.read_game_data("./tests/test_data", copy=True)
+        self.assertTrue(isinstance(data, dict))
+        self.assertTrue(len(data) > 0)
+
     def test_read_game_data_partial(self):
         data = cdda_tools.game.read_game_data("./tests/test_data", ["skill"])
         self.assertTrue(isinstance(data, dict))

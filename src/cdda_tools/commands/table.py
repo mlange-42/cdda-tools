@@ -5,7 +5,7 @@ from fnmatch import translate
 import regex
 
 from .. import game
-from . import Command
+from . import Command, util
 
 PATH_SEPARATOR = "/"
 
@@ -29,7 +29,7 @@ class Table(Command):
             type=str,
             nargs="+",
             help=f"two-element item paths, with path elements delimited by '{PATH_SEPARATOR}' "
-            f"(<type>/<id blob>)",
+            f"(<type>/<id glob>)",
         )
 
         parser.add_argument(
@@ -40,6 +40,8 @@ class Table(Command):
             required=True,
             help=f"columns/property paths to tabulate; path separator is '{PATH_SEPARATOR}'",
         )
+
+        util.add_no_inheritance_options(parser)
 
         parser.add_argument(
             "--format",
@@ -52,7 +54,7 @@ class Table(Command):
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-nested-blocks
-        data = game.read_game_data(arg.dir)
+        data = game.read_game_data(arg.dir, copy=not arg.no_inherit)
 
         columns = ["id"] + arg.columns
         column_paths = [col.split(PATH_SEPARATOR) for col in columns]
@@ -68,12 +70,12 @@ class Table(Command):
                     f"Path '{path}' has {len(path_elem)} element(s)"
                 )
             type_cat = path_elem[0]
-            id_blob = path_elem[1]
+            id_glob = path_elem[1]
 
             if type_cat not in data:
                 raise ValueError(f"Type '{type_cat}' not found in game data.")
 
-            reg = regex.compile(translate(id_blob))
+            reg = regex.compile(translate(id_glob))
             entries = data[type_cat]
 
             for key, entry in entries.items():
