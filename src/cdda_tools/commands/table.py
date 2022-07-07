@@ -19,8 +19,8 @@ class Table(Command):
             help="Show JSON game data in tables.",
             description="Show JSON game data in tables.\n\n"
             "Examples:\n\n"
-            "  cdda_tools table TOOL/rapier TOOL/sword_bayonet "
-            "-c name/str bashing cutting piercing techniques",
+            "  cdda_tools table TOOL/rapier TOOL/sword_bayonet TOOL/sword_xiphos "
+            "--columns name/str bashing cutting piercing weight volume techniques",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
@@ -44,6 +44,7 @@ class Table(Command):
     def exec(self, arg):
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
+        # pylint: disable=too-many-nested-blocks
         data = game.read_game_data(arg.dir)
 
         columns = ["id"] + arg.columns
@@ -76,13 +77,22 @@ class Table(Command):
                 for col, col_path in zip(columns, column_paths):
                     curr_entry = entry
                     for col_path_part in col_path:
-                        if col_path_part in curr_entry:
-                            curr_entry = curr_entry[col_path_part]
+                        if isinstance(curr_entry, dict):
+                            if col_path_part in curr_entry:
+                                curr_entry = curr_entry[col_path_part]
+                            else:
+                                curr_entry = "-"
+                                break
+                        elif isinstance(curr_entry, list):
+                            index = int(col_path_part)
+                            curr_entry = (
+                                curr_entry[index] if index < len(curr_entry) else "?"
+                            )
                         else:
-                            curr_entry = None
+                            curr_entry = "-"
                             break
 
-                    data_entry[col] = "-" if curr_entry is None else str(curr_entry)
+                    data_entry[col] = str(curr_entry)
 
                 data_entry["id"] = key
 
