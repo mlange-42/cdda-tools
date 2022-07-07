@@ -12,4 +12,5 @@ from .list import List
 from .note import Note
 from .notes import Notes
 from .show_data import ShowData
+from .table import Table
 from .vehicle_mod import VehicleMod

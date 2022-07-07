@@ -14,6 +14,7 @@ COMMANDS = {
     "list": commands.List(),
     "player": commands.InspectPlayer(),
     "show-data": commands.ShowData(),
+    "table": commands.Table(),
     "vehicle-mod": commands.VehicleMod(),
 }
 

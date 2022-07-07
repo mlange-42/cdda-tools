@@ -9,6 +9,7 @@ Python command-line tools for [Cataclysm DDA](https://cataclysmdda.org/).
 ## Features
 
 * `show-data`: Browse the game's JSON data hierarchically or by search
+* `table`: Display game data entries and their properties in a table
 * `copy-player`: Copy player between worlds
 * `copy-vehicle`: Copy vehicle between worlds
 * `vehicle-mod`: Make mods from in-game vehicles
@@ -157,4 +158,21 @@ cdda_tools show-data pairs description *[Cc]ake* --list
 > MISSION_pizzaiolo_4                                (mission_definition)
 > brown_bread                                        (COMESTIBLE)
 > ...
+> ```
+
+### Tabular display
+
+Compare three weapons in a table:
+
+```shell
+cdda_tools table TOOL/rapier TOOL/sword_bayonet TOOL/sword_xiphos --columns bashing cutting piercing weight volume
+```
+
+> Output:
+>
+> ```plaintext
+>            id | bas | cut | pie | weight |  volume
+>        rapier |   3 |  28 |   - | 1000 g | 1500 ml
+> sword_bayonet |   7 |  29 |   - |  923 g | 1750 ml
+>  sword_xiphos |   6 |  28 |   - |  800 g |     2 L
 > ```
