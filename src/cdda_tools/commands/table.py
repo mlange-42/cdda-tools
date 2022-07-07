@@ -41,6 +41,13 @@ class Table(Command):
             help=f"columns/property paths to tabulate; path separator is '{PATH_SEPARATOR}'",
         )
 
+        parser.add_argument(
+            "--format",
+            "-f",
+            type=str,
+            help="output format if other than print for direct viewing. one of [md html]",
+        )
+
     def exec(self, arg):
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
@@ -104,17 +111,60 @@ class Table(Command):
                 if str_len > width[col]:
                     width[col] = str_len
 
+        if arg.format is None:
+            yield from _print_table_simple(table_data, columns, width)
+        elif arg.format == "html":
+            yield from _print_table_html(table_data, columns, width)
+        elif arg.format == "md":
+            yield from _print_table_markdown(table_data, columns, width)
+        else:
+            raise ValueError(
+                f"Unrecognized argument '{arg.format}' for option --format. "
+                f"Must be one of [html md]."
+            )
+
+
+def _print_table_simple(table_data, columns, widths):
+    yield " | ".join(
+        [
+            "{val:>{width}}".format(val=col[0 : widths[col]], width=widths[col])
+            for col in columns
+        ]
+    )
+    for entry in table_data:
         yield " | ".join(
             [
-                "{val:>{width}}".format(val=col[0 : width[col]], width=width[col])
+                "{val:>{width}}".format(val=entry[col], width=widths[col])
                 for col in columns
             ]
         )
-        for entry in table_data:
-            line = " | ".join(
-                [
-                    "{val:>{width}}".format(val=entry[col], width=width[col])
-                    for col in columns
-                ]
-            )
-            yield line
+
+
+def _print_table_markdown(table_data, columns, widths):
+    yield "| " + " | ".join(
+        [
+            "{val:>{width}}".format(val=col[0 : widths[col]], width=widths[col])
+            for col in columns
+        ]
+    ) + " |"
+    yield "| " + " | ".join(["-" * widths[col] for col in columns]) + " |"
+    for entry in table_data:
+        yield "| " + " | ".join(
+            [
+                "{val:>{width}}".format(val=entry[col], width=widths[col])
+                for col in columns
+            ]
+        ) + " |"
+
+
+def _print_table_html(table_data, columns, widths):
+    yield "<table>"
+    yield "<tr>\n    <th>" + "</th>\n    <th>".join(
+        ["{val}".format(val=col[0 : widths[col]]) for col in columns]
+    ) + "    </th>\n</tr>"
+
+    for entry in table_data:
+        yield "<tr>\n    <td>" + "</td>\n    <td>".join(
+            ["{val}".format(val=entry[col]) for col in columns]
+        ) + "    </td>\n</tr>"
+    yield "</table>"
