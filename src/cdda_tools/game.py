@@ -2,10 +2,14 @@
 import glob
 from os import path
 
+import regex
+
 from . import json_utils
 
 DATA_DIR = "data"
 JSON_DIR = "json"
+
+NON_NUMBER_REGEX = regex.compile("[^.\\-0-9]+")
 
 
 def read_game_data(game_dir, types=None, copy=False):
@@ -59,10 +63,12 @@ def _copy_to_data(copy_data, data):
                     del new_entry["abstract"]
 
                 for key, value in entry.items():
-                    new_entry[key] = value
+                    _overwrite_property(new_entry, key, value)
 
                 if "copy-from" in new_entry:
                     del new_entry["copy-from"]
+
+                _adjust_inheritance(new_entry)
 
                 _add_to_data(data, new_entry)
                 to_remove.append(entry_id)
@@ -89,6 +95,67 @@ def _copy_to_data(copy_data, data):
                     _add_to_data(data, entry)
 
             break
+
+
+def _overwrite_property(new_entry, key, value):
+    if key not in new_entry:
+        new_entry[key] = value
+    elif isinstance(value, dict):
+        if isinstance(new_entry[key], dict):
+            for sub_key, sub_value in value.items():
+                _overwrite_property(new_entry[key], sub_key, sub_value)
+        else:
+            new_entry[key] = value
+    else:
+        new_entry[key] = value
+
+
+def _adjust_inheritance(entry):
+    if "proportional" in entry:
+        _adjust_inheritance_func(entry, "proportional", lambda a, b: round(a * b, 1))
+        del entry["proportional"]
+
+    if "relative" in entry:
+        _adjust_inheritance_func(entry, "relative", lambda a, b: round(a + b, 1))
+        del entry["relative"]
+
+
+def _adjust_inheritance_func(entry, prop, func):
+    # pylint: disable=too-many-branches
+    for key, factor in entry[prop].items():
+        if key not in entry:
+            continue
+
+        factor = factor.split(" ") if isinstance(factor, str) else [factor]
+        if isinstance(factor[0], str):
+            factor[0] = float(factor[0])
+
+        old_value = entry[key]
+        if isinstance(old_value, (int, float)):
+            entry[key] = func(old_value, factor[0])
+        elif isinstance(old_value, str):
+            if " " in old_value:
+                parts = old_value.split(" ")
+            else:
+                unit = regex.findall(NON_NUMBER_REGEX, old_value)[0]
+                parts = [old_value.replace(unit, ""), unit]
+
+            if len(factor) > 1 and factor[1] != parts[1]:
+                print(
+                    f"Warning: inheritance adjustment not possible due to different units "
+                    f"({parts[1]}, {factor[1]})"
+                )
+            else:
+                entry[key] = f"{func(float(parts[0]), factor[0])} {parts[1]}"
+
+        elif isinstance(old_value, list):
+            # pylint: disable=fixme
+            # TODO
+            pass
+        else:
+            for sub_key, sub_factor in factor[0].items():
+                if sub_key in old_value and (isinstance(sub_factor, (int, float))):
+                    entry[key][sub_key] = func(old_value[sub_key], sub_factor)
 
 
 def _add_to_data_or_copy(data, copy_data, entry, types, copy):

@@ -1,6 +1,14 @@
 import unittest
 
+import regex
+
 import cdda_tools
+
+
+class TestUnits(unittest.TestCase):
+    def test_units(self):
+        reg = cdda_tools.game.NON_NUMBER_REGEX
+        self.assertEqual(regex.findall(reg, "-123.5ml"), ["ml"])
 
 
 class TestNotes(unittest.TestCase):
