@@ -23,7 +23,65 @@ def read_game_data(game_dir, types=None, copy=False):
         for entry in json_data:
             _add_to_data_or_copy(data, copy_data, entry, types, copy)
 
+    if copy:
+        _copy_to_data(copy_data, data)
+
     return data
+
+
+def _copy_to_data(copy_data, data):
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+
+    total_to_copy = sum(len(v) for _, v in copy_data.items())
+
+    while True:
+        any_left = False
+        any_found = False
+
+        for type_id, type_data in copy_data.items():
+            to_remove = []
+            for entry_id, entry in type_data.items():
+                from_id = entry["copy-from"]
+
+                if from_id in data[type_id]:
+                    new_entry = dict(data[type_id][from_id])
+                elif from_id in data["GENERIC"]:
+                    new_entry = dict(data["GENERIC"][from_id])
+                else:
+                    continue
+
+                if "abstract" in new_entry:
+                    del new_entry["abstract"]
+
+                for key, value in entry.items():
+                    new_entry[key] = value
+
+                _add_to_data(data, new_entry)
+                to_remove.append(entry_id)
+                any_found = True
+
+            for entry_id in to_remove:
+                del type_data[entry_id]
+
+            if len(type_data) > 0:
+                any_left = True
+
+        if not any_left:
+            break
+
+        if not any_found:
+            remaining = sum(len(v) for _, v in copy_data.items())
+            print(
+                f"Warning: not all inheriting entries could be resolved "
+                f"({remaining}/{total_to_copy} remaining)"
+            )
+
+            for type_id, type_data in copy_data.items():
+                for _entry_id, entry in type_data.items():
+                    _add_to_data(data, entry)
+
+            break
 
 
 def _add_to_data_or_copy(data, copy_data, entry, types, copy):
@@ -32,14 +90,7 @@ def _add_to_data_or_copy(data, copy_data, entry, types, copy):
         return
 
     if copy and "copy-from" in entry:
-        from_id = entry["copy-from"]
-        if entry_type in data and from_id in data[entry_type]:
-            new_entry = dict(data[entry_type][from_id])
-            for key, value in entry:
-                new_entry[key] = value
-            _add_to_data(data, new_entry)
-        else:
-            _add_to_data(copy_data, entry)
+        _add_to_data(copy_data, entry)
     else:
         _add_to_data(data, entry)
 

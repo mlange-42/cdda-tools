@@ -85,6 +85,16 @@ def add_dry_run_options(parser):
     )
 
 
+def add_no_inheritance_options(parser):
+    """Adds default no-inheritance option to a parser"""
+    parser.add_argument(
+        "--no-inherit",
+        "-I",
+        action="store_true",
+        help="prevent trying to solve inheritance (i.e. copy-from properties)",
+    )
+
+
 def check_is_single_vehicle_source(source_maps, name):
     """
     Checks that only a single element is passed,

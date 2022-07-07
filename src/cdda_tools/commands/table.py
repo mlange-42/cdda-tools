@@ -5,7 +5,7 @@ from fnmatch import translate
 import regex
 
 from .. import game
-from . import Command
+from . import Command, util
 
 PATH_SEPARATOR = "/"
 
@@ -41,6 +41,8 @@ class Table(Command):
             help=f"columns/property paths to tabulate; path separator is '{PATH_SEPARATOR}'",
         )
 
+        util.add_no_inheritance_options(parser)
+
         parser.add_argument(
             "--format",
             "-f",
@@ -52,7 +54,7 @@ class Table(Command):
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-nested-blocks
-        data = game.read_game_data(arg.dir)
+        data = game.read_game_data(arg.dir, copy=not arg.no_inherit)
 
         columns = ["id"] + arg.columns
         column_paths = [col.split(PATH_SEPARATOR) for col in columns]
