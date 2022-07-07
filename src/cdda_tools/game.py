@@ -45,17 +45,24 @@ def _copy_to_data(copy_data, data):
                 from_id = entry["copy-from"]
 
                 if from_id in data[type_id]:
-                    new_entry = dict(data[type_id][from_id])
+                    orig_entry = data[type_id][from_id]
                 elif from_id in data["GENERIC"]:
-                    new_entry = dict(data["GENERIC"][from_id])
+                    orig_entry = data["GENERIC"][from_id]
                 else:
                     continue
 
+                if "copy-from" in orig_entry:
+                    continue
+
+                new_entry = dict(orig_entry)
                 if "abstract" in new_entry:
                     del new_entry["abstract"]
 
                 for key, value in entry.items():
                     new_entry[key] = value
+
+                if "copy-from" in new_entry:
+                    del new_entry["copy-from"]
 
                 _add_to_data(data, new_entry)
                 to_remove.append(entry_id)
