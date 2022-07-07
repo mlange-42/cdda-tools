@@ -161,10 +161,10 @@ def _print_table_html(table_data, columns, widths):
     yield "<table>"
     yield "<tr>\n    <th>" + "</th>\n    <th>".join(
         ["{val}".format(val=col[0 : widths[col]]) for col in columns]
-    ) + "    </th>\n</tr>"
+    ) + "</th>\n</tr>"
 
     for entry in table_data:
         yield "<tr>\n    <td>" + "</td>\n    <td>".join(
             ["{val}".format(val=entry[col]) for col in columns]
-        ) + "    </td>\n</tr>"
+        ) + "</td>\n</tr>"
     yield "</table>"
