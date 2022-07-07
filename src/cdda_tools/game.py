@@ -21,16 +21,31 @@ def read_game_data(game_dir, types=None, copy=False):
     for file in glob.iglob(json_glob, recursive=True):
         json_data = json_utils.read_json(file)
         for entry in json_data:
-            _add_to_data(data, copy_data, entry, types, copy)
+            _add_to_data_or_copy(data, copy_data, entry, types, copy)
 
     return data
 
 
-def _add_to_data(data, _copy_data, entry, types, _copy):
+def _add_to_data_or_copy(data, copy_data, entry, types, copy):
     entry_type = entry["type"]
     if types is not None and entry_type not in types:
         return
 
+    if copy and "copy-from" in entry:
+        from_id = entry["copy-from"]
+        if entry_type in data and from_id in data[entry_type]:
+            new_entry = dict(data[entry_type][from_id])
+            for key, value in entry:
+                new_entry[key] = value
+            _add_to_data(data, new_entry)
+        else:
+            _add_to_data(copy_data, entry)
+    else:
+        _add_to_data(data, entry)
+
+
+def _add_to_data(data, entry):
+    entry_type = entry["type"]
     if "id" in entry:
         entry_ids = entry["id"]
         if not isinstance(entry_ids, list):
@@ -40,7 +55,7 @@ def _add_to_data(data, _copy_data, entry, types, _copy):
                 data[entry_type][entry_id] = entry
             else:
                 data[entry_type] = {entry_id: entry}
-    elif "abstract" in entry and entry_type != "recipe" and entry_type != "uncraft":
+    elif "abstract" in entry:
         entry_id = entry["abstract"]
         if entry_type in data:
             data[entry_type][entry_id] = entry
@@ -48,6 +63,6 @@ def _add_to_data(data, _copy_data, entry, types, _copy):
             data[entry_type] = {entry_id: entry}
     else:
         if entry_type in data:
-            data[entry_type].append(entry)
+            data[entry_type][str(len(data[entry_type]))] = entry
         else:
-            data[entry_type] = [entry]
+            data[entry_type] = {"0": entry}
