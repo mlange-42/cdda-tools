@@ -20,7 +20,7 @@ class Table(Command):
             description="Show JSON game data in tables.\n\n"
             "Examples:\n\n"
             "  cdda_tools table TOOL/rapier TOOL/sword_bayonet "
-            "-c bashing cutting piercing techniques",
+            "-c name/str bashing cutting piercing techniques",
             formatter_class=argparse.RawTextHelpFormatter,
         )
 
@@ -38,15 +38,16 @@ class Table(Command):
             type=str,
             nargs="+",
             required=True,
-            help=f"columns / property paths to tabulate. path separator is '{PATH_SEPARATOR}'",
+            help=f"columns/property paths to tabulate; path separator is '{PATH_SEPARATOR}'",
         )
 
     def exec(self, arg):
         # pylint: disable=too-many-locals
-
+        # pylint: disable=too-many-branches
         data = game.read_game_data(arg.dir)
 
         columns = ["id"] + arg.columns
+        column_paths = [col.split(PATH_SEPARATOR) for col in columns]
         width = {c: 3 for c in columns}
 
         table_data = []
@@ -72,11 +73,16 @@ class Table(Command):
                     continue
 
                 data_entry = {}
-                for col in columns:
-                    if col in entry:
-                        data_entry[col] = str(entry[col])
-                    else:
-                        data_entry[col] = "-"
+                for col, col_path in zip(columns, column_paths):
+                    curr_entry = entry
+                    for col_path_part in col_path:
+                        if col_path_part in curr_entry:
+                            curr_entry = curr_entry[col_path_part]
+                        else:
+                            curr_entry = None
+                            break
+
+                    data_entry[col] = "-" if curr_entry is None else str(curr_entry)
 
                 data_entry["id"] = key
 
